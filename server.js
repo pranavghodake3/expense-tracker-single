@@ -4,6 +4,8 @@ const testRoute = require("./routes/testRoute");
 const bodyParser = require('body-parser');
 require("dotenv").config();
 
+const PORT = process.env.PORT ?? 5000;
+
 
 
 app.set('view engine', 'ejs');
@@ -22,6 +24,6 @@ app.use("/test", testRoute);
 
 
 
-app.listen(process.env.PORT, () => {
-    console.log("Server started on PORT: ", process.env.PORT)
+app.listen(PORT, () => {
+    console.log("Server started on PORT: ", PORT)
 });
