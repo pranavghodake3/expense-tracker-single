@@ -7,7 +7,8 @@ const successResponse = (res, data, message = "Success") => {
     });
 };
 
-const errorResponse = (res, message = "An error occurred, please contact developer.", code = 500, error = null) => {
+const errorResponse = (res, error = null, message = "An error occurred, please contact developer.", code = 500) => {
+  console.log(error)
     return res.status(code).json({
       status: false,
       message,

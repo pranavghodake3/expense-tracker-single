@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Form</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Expense Tracker</h2>
+        <form action="/add" method="POST">
+            <input type="date" name="date" required>
+            <input type="number" name="amount" placeholder="Amount" required>
+            <select name="category">
+                <option>Food</option>
+                <option>Travel</option>
+                <option>Shopping</option>
+            </select>
+            <input type="text" name="description" placeholder="Description">
+            <button type="submit">Add</button>
+        </form>
+
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+            <% expenses.forEach(expense => { %>
+                <tr>
+                    <td><%= expense.date %></td>
+                    <td><%= expense.category %></td>
+                    <td><%= expense.amount %></td>
+                </tr>
+            <% }); %>
+        </table>
+    </div>
+</body>
+</html>

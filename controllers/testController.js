@@ -6,7 +6,7 @@ const testFirstFunction = async (req, res) => {
         const response = await testService.testFirstFunction();
         return successResponse(res, response);
     } catch (error) {
-        return errorResponse(res);
+        return errorResponse(res, error);
     }
 };
 

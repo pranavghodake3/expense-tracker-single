@@ -4,76 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-            text-align: center;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        input, select, textarea {
-            margin-bottom: 10px;
-            padding: 8px;
-            font-size: 16px;
-        }
-        button {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background: #218838;
-        }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background: #28a745;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <div class="container">
         <h2>Expense Tracker</h2>
-
+        <p>Response: <%= formData?.message ?? '' %></p>
         <!-- Expense Form -->
-        <form action="/add-expense" method="POST">
+        <form action="/expenses" method="POST">
             <input type="date" name="date" required>
             <input type="number" name="amount" placeholder="Amount" required>
             <select name="category" required>
-                <option value="" disabled selected>Select Category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Other">Other</option>
+                <% categories.forEach(category => { %>
+                    <option value="<%= category %>" <%= category === "Other" ? "selected" : "" %>"><%= category %></option>
+                <% }) %>
             </select>
-            <textarea name="description" placeholder="Description" rows="3"></textarea>
+            <input type="text" name="description" placeholder="Description">
             <button type="submit">Add Expense</button>
         </form>
 
@@ -91,7 +37,7 @@
                     <tr>
                         <td><%= expense.date %></td>
                         <td><%= expense.category %></td>
-                        <td>$<%= expense.amount %></td>
+                        <td><%= (parseFloat(expense.amount)).toLocaleString() %></td>
                     </tr>
                 <% }) %>
             </tbody>

@@ -1,24 +1,27 @@
 const express = require("express");
 const app = express();
-const testRoute = require("./routes/testRoute");
+const expenseRoute = require("./routes/expenseRoute");
+const homeRoute = require("./routes/homeRoute");
 const bodyParser = require('body-parser');
+const session = require("express-session");
 require("dotenv").config();
 
 const PORT = process.env.PORT ?? 5000;
-
-
-
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET_KEY, // Change to a strong secret
+      resave: false,
+      saveUninitialized: true,
+    })
+  );
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Home Route - Show Posts
-app.get('/', (req, res) => {
-    let expenses = [{date: 'Fri,14-02-25', category: 'Petrol', amount: 500}];
-    res.render('index', { expenses });
-});
+app.get('/', homeRoute);
 
-app.use("/test", testRoute);
+app.use("/expenses", expenseRoute);
 
 
 
