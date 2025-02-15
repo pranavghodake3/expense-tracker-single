@@ -1,5 +1,5 @@
 const { google } = require("googleapis");
-const googleCredentials = require("../config/google-credentials.json");
+const googleCredentials = require("../google-credentials.json");
 require("dotenv").config();
 
 // Load Google API credentials
