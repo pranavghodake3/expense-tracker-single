@@ -78,10 +78,12 @@ const getCategories = () => {
 };
 
 const addExpense = async(body) => {
-    const { category, amount, date, description } = body;
+  const data = [];
+  for (let i = 0; i < body.length; i++) {
+    const { category, amount, date, description } = body[i];
     const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
     const SHEET_NAME = `${currentMonth} ${currentYear}`;
-    const data = await sheets.spreadsheets.values.append({
+    const response = await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A3:D3`,
       valueInputOption: "RAW",
@@ -90,6 +92,9 @@ const addExpense = async(body) => {
         values: [[formatDate(date), description ?? category, category, parseFloat(amount)]],
       },
     });
+    data.push(response)
+  }
+    
     // const data = await sheets.spreadsheets.values.update({
     //     spreadsheetId: SPREADSHEET_ID,
     //     range: `${SHEET_NAME}!A2:D2`, // Change to the correct row dynamically if needed

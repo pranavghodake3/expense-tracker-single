@@ -12,15 +12,19 @@
         <p id="form-status" class="hide"></p>
         <!-- Expense Form -->
         <form action="/expenses" id="add-expense-form" class="" method="POST">
-            <input type="date" id="date" name="date" required>
-            <input type="number" id="amount" name="amount" placeholder="Amount" required>
-            <select name="category" id="category" required>
-                <% categories.forEach(category => { %>
-                    <option value="<%= category %>" <%= category === "Other" ? "selected" : "" %>"><%= category %></option>
-                <% }) %>
-            </select>
-            <input type="text" id="description" name="description" placeholder="Description">
-            <button type="submit">Add Expense</button>
+            <div id="fieldsContainer">
+                <div class="single-expense-form">
+                    <input type="date" id="date" name="date[]" class="date-field" required>
+                    <input type="number" id="amount" name="amount[]" class="amount-field" placeholder="Amount" required>
+                    <select name="category[]" id="category" class="category-field" required>
+                            <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
+                    <button type="button" class="remove-btn">Remove</button>
+                </div>
+            </div>
+            <button type="button" id="addField">Add More</button>
+            <button type="submit">Submit</button>
             <button type="button" onclick="onCancelClick(this);">Cancel</button>
         </form>
         <button type="button" id="add-expense" onclick="onAddExpenseClick(this);">Add Expense</button>
@@ -43,7 +47,65 @@
         </table>
     </div>
     <script>
+        const allExpenses = {};
         document.getElementById("currentYear").innerHTML = new Date().getFullYear().toString();
+
+        document.getElementById("addField").addEventListener("click", function() {
+            const container = document.getElementById("fieldsContainer");
+
+            const newGroup = document.createElement("div");
+            newGroup.classList.add("single-expense-form");
+            newGroup.innerHTML = `
+                <input type="date" id="date" name="date[]" class="date-field" required>
+                <input type="number" id="amount" name="amount[]" class="amount-field" placeholder="Amount" required>
+                <select name="category[]" id="category" class="category-field" required>
+                        <option value="Other">Other</option>
+                </select>
+                <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
+                <button type="button" class="remove-btn">Remove</button>
+            `;
+
+            container.appendChild(newGroup);
+        });
+
+
+        document.getElementById("add-expense-form").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            const formDataArray = [];
+            const dateFields = document.querySelectorAll(".date-field");
+            const amountFields = document.querySelectorAll(".amount-field");
+            const categoryFields = document.querySelectorAll(".category-field");
+            const descriptionFields = document.querySelectorAll(".description-field");
+            console.log("dateFields: ",dateFields)
+
+            // Collect data from each form field group
+            dateFields.forEach((dateField, index) => {
+                formDataArray.push({
+                    date: dateFields[index].value,
+                    amount: amountFields[index].value,
+                    category: categoryFields[index].value,
+                    description: descriptionFields[index].value
+                });
+            });
+            console.log("formDataArray: ",formDataArray)
+            // const formData = {
+            //     date: this.date.value,
+            //     amount: this.amount.value,
+            //     category: this.category.value,
+            //     description: this.description.value,
+            // };
+            
+            let formSubmitData = await fetch("/expenses", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formDataArray),
+            });
+            console.log("formSubmitData: ",formSubmitData)
+            showStatusMessage("Added Successfully!", 'true');
+        });
         function onCancelClick(event){
             // document.getElementById('add-expense-form').classList.add('hide');
             document.getElementById('add-expense').classList.remove('hide');
@@ -100,6 +162,7 @@
             if(data.status){
                 expensesTbody.innerHTML = '';
                 let sum = 0;
+                allExpenses[month] = data.data.expenses;
                 if(data.data.expenses.length > 0){
                     data.data.expenses.forEach(item => {
                         let row = expensesTbody.insertRow();
@@ -142,7 +205,18 @@
         async function onMonthChange(event){
             await loadExpenses(event.value);
         }
-        window.onload = loadExpenses(currentMonth);
+        async function loadCategories(){
+            let data = await fetch('/categories');
+            data = await data.json();
+            const select = document.getElementById("month");
+            data.forEach((month, index) => {
+                let option = document.createElement("option");
+                option.value = month;
+                option.text = month;
+                select.appendChild(option);
+            });
+        }
+        window.onload = loadExpenses(currentMonth)
     </script>
 </body>
 </html>

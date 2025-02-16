@@ -80,4 +80,10 @@ form#add-expense-form{
 #expenses td:nth-child(4) {
     text-align: center;
 }
-
+#add-expense{
+    padding: 2px;
+    font-size: 12px;
+}
+table{
+    font-size: 13px;
+}

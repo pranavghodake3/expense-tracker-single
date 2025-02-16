@@ -13,14 +13,15 @@ const getExpenses = async (req, res) => {
 
 const addExpense = async (req, res) => {
     try {
+        console.log("req.body: ",req.body)
         const response = await expenseService.addExpense(req.body);
         req.session.formData = { success: true, message: "Expense added successfully!" };
-        res.redirect("/");
-        // return successResponse(res, response);
+        // res.redirect("/");
+        return successResponse(res, response);
     } catch (error) {
         req.session.formData = { success: false, message: error.message };
-        res.redirect("/");
-        // return errorResponse(res, error);
+        // res.redirect("/");
+        return errorResponse(res, error);
     }
 };
 
