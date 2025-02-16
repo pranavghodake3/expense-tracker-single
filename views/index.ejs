@@ -8,40 +8,124 @@
 </head>
 <body>
     <div class="container">
-        <h2>Expense Tracker</h2>
-        <p>Response: <%= formData?.message ?? '' %></p>
+        <!-- <div id="expense-tracker-title">Expense Tracker</div> -->
+        <p id="form-status" class="hide"></p>
         <!-- Expense Form -->
-        <form action="/expenses" method="POST">
-            <input type="date" name="date" required>
-            <input type="number" name="amount" placeholder="Amount" required>
-            <select name="category" required>
+        <form action="/expenses" id="add-expense-form" class="" method="POST">
+            <input type="date" id="date" name="date" required>
+            <input type="number" id="amount" name="amount" placeholder="Amount" required>
+            <select name="category" id="category" required>
                 <% categories.forEach(category => { %>
                     <option value="<%= category %>" <%= category === "Other" ? "selected" : "" %>"><%= category %></option>
                 <% }) %>
             </select>
-            <input type="text" name="description" placeholder="Description">
+            <input type="text" id="description" name="description" placeholder="Description">
             <button type="submit">Add Expense</button>
+            <button type="button" onclick="onCancelClick(this);">Cancel</button>
         </form>
-
-        <!-- Expense Table -->
+        <button type="button" id="add-expense" onclick="onAddExpenseClick(this);">Add Expense</button>
+        <div class="expense-info">
+            <b id="currentYear"></b>
+            <select name="month" id="month" onchange="onMonthChange(this)"></select>
+            : <b id="sum">5,000</b>
+        </div>
         <table>
             <thead>
                 <tr>
                     <th>Date</th>
                     <th>Category</th>
                     <th>Amount</th>
+                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <% expenses.forEach(expense => { %>
-                    <tr>
-                        <td><%= expense.date %></td>
-                        <td><%= expense.category %></td>
-                        <td><%= (parseFloat(expense.amount)).toLocaleString() %></td>
-                    </tr>
-                <% }) %>
-            </tbody>
+            <tbody id="expenses"></tbody>
         </table>
     </div>
+    <script>
+        document.getElementById("currentYear").innerHTML = new Date().getFullYear().toString();
+        function onCancelClick(event){
+            // document.getElementById('add-expense-form').classList.add('hide');
+            document.getElementById('add-expense').classList.remove('hide');
+            document.getElementById('add-expense-form').style.display = 'none';
+            // document.getElementById('add-expense').style.display = 'block';
+        }
+        function onAddExpenseClick(event){
+            // document.getElementById('add-expense-form').classList.remove('hide');
+            event.classList.add('hide');
+            document.getElementById('add-expense-form').style.display = 'block';
+            // event.style.display = 'none';
+        }
+        document.getElementById("date").value = new Date().toISOString().split('T')[0];
+        const formStatusMessage = "<%= formData?.message ?? '' %>";
+        showStatusMessage(formStatusMessage, "<%= formData?.success ?? '' %>");
+        // if(formStatusMessage){
+        //     const formStatus = "<%= formData?.success ?? '' %>";
+        //     const formStatusElement = document.getElementById('form-status');
+        //     formStatusElement.innerHTML = formStatusMessage;
+        //     formStatusElement.classList.remove('hide');
+        //     formStatusElement.classList.add(formStatus);
+        //     setTimeout(() => {
+        //         formStatusElement.style.display = "none";
+        //         formStatusElement.classList.add('hide');
+        //     }, formStatus === "true" ? 2000 : 10000);
+        // }
+        function showStatusMessage(formStatusMessage, formStatus){
+            const formStatusElement = document.getElementById('form-status');
+            formStatusElement.classList.remove('hide');
+            if(formStatusMessage){
+                // const formStatus = "<%= formData?.success ?? '' %>";
+                
+                formStatusElement.innerHTML = formStatusMessage;
+                formStatusElement.classList.remove('hide');
+                formStatusElement.classList.add(formStatus);
+                setTimeout(() => {
+                    // formStatusElement.style.display = "none";
+                    formStatusElement.classList.add('hide');
+                }, formStatus === "true" ? 2000 : 10000);
+            }
+        }
+
+        async function loadExpenses(month){
+            const expensesTbody = document.getElementById("expenses");
+            expensesTbody.innerHTML = 'Loadding...';
+            let data = await fetch('/expenses?month='+month);
+            data = await data.json();
+            if(data.status){
+                expensesTbody.innerHTML = '';
+                let sum = 0;
+                data.data.expenses.forEach(item => {
+                    let row = expensesTbody.insertRow();
+                    let cell1 = row.insertCell(0);
+                    let cell2 = row.insertCell(1);
+                    let cell3 = row.insertCell(2);
+                    let cell4 = row.insertCell(3);
+                    cell1.textContent = item.date;
+                    cell2.textContent = item.category;
+                    cell3.textContent = (parseFloat(item.amount)).toLocaleString();
+                    cell4.textContent = '';
+                    sum += parseFloat(item.amount);
+                });
+                document.getElementById("sum").innerHTML = sum.toLocaleString();
+            }else{
+                showStatusMessage(data.error, 'false');
+            }
+        }
+
+        // Month
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const select = document.getElementById("month");
+        months.forEach((month, index) => {
+            let option = document.createElement("option");
+            option.value = month;
+            option.text = month;
+            select.appendChild(option);
+        });
+        const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
+        select.value = currentMonth;
+        async function onMonthChange(event){
+            await loadExpenses(event.value);
+        }
+        window.onload = loadExpenses(currentMonth);
+    </script>
 </body>
 </html>

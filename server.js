@@ -9,7 +9,7 @@ require("dotenv").config();
 const PORT = process.env.PORT ?? 5000;
 app.use(
     session({
-      secret: process.env.SESSION_SECRET_KEY, // Change to a strong secret
+      secret: process.env.SESSION_SECRET_KEY,
       resave: false,
       saveUninitialized: true,
     })
@@ -20,12 +20,7 @@ app.use(express.static('public'));
 
 // Home Route - Show Posts
 app.get('/', homeRoute);
-
 app.use("/expenses", expenseRoute);
-
-
-
-
 
 app.listen(PORT, () => {
     console.log("Server started on PORT: ", PORT)

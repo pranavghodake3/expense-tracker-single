@@ -12,44 +12,82 @@ const client = new google.auth.GoogleAuth({
 const sheets = google.sheets({ version: "v4", auth: client });
 // Google Sheet ID (replace with your actual Sheet ID)
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const SHEET_NAME = "Feb 25";
+const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
+const currentYear = new Date().getFullYear().toString().slice(-2);
+let SHEET_NAME = `${currentMonth} ${currentYear}`;
 
-const getExpenses = async() => {
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:D`,
-    });
-    let expenses = response.data.values.map(e => {
-        const expense = {
-            date: e[0],
-            amount: e[3],
-            category: e[2],
-        };
-        return e.length == 0 || e[0] == 'Date' ? false : expense;
-      });
-      expenses = expenses.filter(e => e)
-    const categories = [
-        'Other',
-        'Petrol',
-        'Daaru',
-        'Hotels',
-    ]
-
-    return {
-        expenses,
-        categories
+const getExpenses = async(month = null) => {
+  SHEET_NAME = `${month ?? currentMonth} ${currentYear}`;
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${SHEET_NAME}!A:D`,
+  });
+  let expenses = response.data.values.map(e => {
+    const expense = {
+        date: e[0],
+        amount: e[3],
+        category: e[2],
     };
+    return e.length == 0 || e[0] == 'Date' ? false : expense;
+  });
+  expenses = expenses.filter(e => e);
+  expenses.sort((a, b) => {
+    // Extract date part (ignoring the weekday)
+    const parseDate = (str) => {
+      let [, day, month, year] = str.match(/(\d{2})-(\d{2})-(\d{2})/);
+      return new Date(`20${year}-${month}-${day}`); // Convert to full year format (e.g., 2025)
+    };
+    return parseDate(b.date) - parseDate(a.date);
+  });
+  const categories = [
+      'Other',
+      'Extra Unplanned',
+      'Petrol',
+      'Fast food & Drink',
+      'Daaru',
+      'Bills & Utilities',
+      'Hotels',
+      'Shoping',
+      'Mutton Mase',
+      'Grocery',
+      'Entertainment',
+  ]
+
+  return {
+      expenses,
+      categories
+  };
+};
+
+const getCategories = () => {
+  const categories = [
+      'Other',
+      'Extra Unplanned',
+      'Petrol',
+      'Fast food & Drink',
+      'Daaru',
+      'Bills & Utilities',
+      'Hotels',
+      'Shoping',
+      'Mutton Mase',
+      'Grocery',
+      'Entertainment',
+  ]
+
+  return {
+      categories,
+  };
 };
 
 const addExpense = async(body) => {
-    const { category, amount, date } = body;
+    const { category, amount, date, description } = body;
     const data = await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A3:D3`,
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
-        values: [[formatDate(date), category, category, parseFloat(amount)]],
+        values: [[formatDate(date), description ?? category, category, parseFloat(amount)]],
       },
     });
     // const data = await sheets.spreadsheets.values.update({
@@ -79,4 +117,5 @@ function formatDate(dateString) {
 module.exports = {
     getExpenses,
     addExpense,
+    getCategories,
 };
