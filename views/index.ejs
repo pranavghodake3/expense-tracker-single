@@ -33,6 +33,7 @@
             <thead>
                 <tr>
                     <th>Date</th>
+                    <th>Title</th>
                     <th>Category</th>
                     <th>Amount</th>
                     <th>Action</th>
@@ -90,7 +91,7 @@
             expensesTbody.innerHTML = '';
             let row = expensesTbody.insertRow();
             let cell1 = row.insertCell(0);
-            cell1.colSpan = 4;
+            cell1.colSpan = 5;
             cell1.style.textAlign  = "center";
             cell1.textContent = "Loadding...";
             // expensesTbody.innerHTML = 'Loadding...';
@@ -102,11 +103,13 @@
                 if(data.data.expenses.length > 0){
                     data.data.expenses.forEach(item => {
                         let row = expensesTbody.insertRow();
-                        let cell1 = row.insertCell(0);
-                        let cell2 = row.insertCell(1);
-                        let cell3 = row.insertCell(2);
-                        let cell4 = row.insertCell(3);
-                        cell1.textContent = item.date;
+                        let cell0 = row.insertCell(0);
+                        let cell1 = row.insertCell(1);
+                        let cell2 = row.insertCell(2);
+                        let cell3 = row.insertCell(3);
+                        let cell4 = row.insertCell(4);
+                        cell0.textContent = item.date;
+                        cell1.textContent = item.title;
                         cell2.textContent = item.category;
                         cell3.textContent = (parseFloat(item.amount)).toLocaleString();
                         cell4.textContent = '';
@@ -115,7 +118,7 @@
                 }else{
                     let row = expensesTbody.insertRow();
                     let cell1 = row.insertCell(0);
-                    cell1.colSpan = 4;
+                    cell1.colSpan = 5;
                     cell1.style.textAlign  = "center";
                     cell1.textContent = "No expenses";
                 }

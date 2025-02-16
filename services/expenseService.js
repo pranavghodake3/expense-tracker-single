@@ -22,6 +22,7 @@ const getExpenses = async(month = null) => {
   let expenses = response.data.values.map(e => {
     const expense = {
         date: e[0],
+        title: e[1],
         amount: e[3],
         category: e[2],
     };

@@ -77,7 +77,7 @@ form#add-expense-form{
     margin-bottom: 0;
     padding: 2px;
 }
-#expenses td:nth-child(3) {
+#expenses td:nth-child(4) {
     text-align: center;
 }
 
