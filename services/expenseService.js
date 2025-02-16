@@ -1,8 +1,6 @@
 const { google } = require("googleapis");
 const googleCredentials = require("../google-credentials.json");
 require("dotenv").config();
-
-// Load Google API credentials
 // const credentials = JSON.parse(fs.readFileSync("google-credentials.json"));
 const credentials = googleCredentials;
 const client = new google.auth.GoogleAuth({
@@ -10,13 +8,12 @@ const client = new google.auth.GoogleAuth({
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 const sheets = google.sheets({ version: "v4", auth: client });
-// Google Sheet ID (replace with your actual Sheet ID)
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
 const currentYear = new Date().getFullYear().toString().slice(-2);
-let SHEET_NAME = `${currentMonth} ${currentYear}`;
 
 const getExpenses = async(month = null) => {
+  const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
+  let SHEET_NAME = `${currentMonth} ${currentYear}`;
   SHEET_NAME = `${month ?? currentMonth} ${currentYear}`;
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
@@ -81,6 +78,8 @@ const getCategories = () => {
 
 const addExpense = async(body) => {
     const { category, amount, date, description } = body;
+    const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
+    const SHEET_NAME = `${currentMonth} ${currentYear}`;
     const data = await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A3:D3`,
