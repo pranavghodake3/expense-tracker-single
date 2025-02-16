@@ -87,24 +87,38 @@
 
         async function loadExpenses(month){
             const expensesTbody = document.getElementById("expenses");
-            expensesTbody.innerHTML = 'Loadding...';
+            expensesTbody.innerHTML = '';
+            let row = expensesTbody.insertRow();
+            let cell1 = row.insertCell(0);
+            cell1.colSpan = 4;
+            cell1.style.textAlign  = "center";
+            cell1.textContent = "Loadding...";
+            // expensesTbody.innerHTML = 'Loadding...';
             let data = await fetch('/expenses?month='+month);
             data = await data.json();
             if(data.status){
                 expensesTbody.innerHTML = '';
                 let sum = 0;
-                data.data.expenses.forEach(item => {
+                if(data.data.expenses.lemgth > 0){
+                    data.data.expenses.forEach(item => {
+                        let row = expensesTbody.insertRow();
+                        let cell1 = row.insertCell(0);
+                        let cell2 = row.insertCell(1);
+                        let cell3 = row.insertCell(2);
+                        let cell4 = row.insertCell(3);
+                        cell1.textContent = item.date;
+                        cell2.textContent = item.category;
+                        cell3.textContent = (parseFloat(item.amount)).toLocaleString();
+                        cell4.textContent = '';
+                        sum += parseFloat(item.amount);
+                    });
+                }else{
                     let row = expensesTbody.insertRow();
                     let cell1 = row.insertCell(0);
-                    let cell2 = row.insertCell(1);
-                    let cell3 = row.insertCell(2);
-                    let cell4 = row.insertCell(3);
-                    cell1.textContent = item.date;
-                    cell2.textContent = item.category;
-                    cell3.textContent = (parseFloat(item.amount)).toLocaleString();
-                    cell4.textContent = '';
-                    sum += parseFloat(item.amount);
-                });
+                    cell1.colSpan = 4;
+                    cell1.style.textAlign  = "center";
+                    cell1.textContent = "No expenses";
+                }
                 document.getElementById("sum").innerHTML = sum.toLocaleString();
             }else{
                 showStatusMessage(data.error, 'false');
