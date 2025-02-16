@@ -27,7 +27,7 @@
         <div class="expense-info">
             <b id="currentYear"></b>
             <select name="month" id="month" onchange="onMonthChange(this)"></select>
-            : <b id="sum">5,000</b>
+            : <b id="sum"></b>
         </div>
         <table>
             <thead>
@@ -99,7 +99,7 @@
             if(data.status){
                 expensesTbody.innerHTML = '';
                 let sum = 0;
-                if(data.data.expenses.lemgth > 0){
+                if(data.data.expenses.length > 0){
                     data.data.expenses.forEach(item => {
                         let row = expensesTbody.insertRow();
                         let cell1 = row.insertCell(0);
