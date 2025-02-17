@@ -17,7 +17,6 @@
                     <input type="date" id="date" name="date[]" class="date-field" required>
                     <input type="number" id="amount" name="amount[]" class="amount-field" placeholder="Amount" required>
                     <select name="category[]" id="category" class="category-field" required>
-                            <option value="Other">Other</option>
                     </select>
                     <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
                     <button type="button" class="remove-btn">Remove</button>
@@ -48,6 +47,7 @@
     </div>
     <script>
         const allExpenses = {};
+        let categories = [];
         document.getElementById("currentYear").innerHTML = new Date().getFullYear().toString();
 
         document.getElementById("addField").addEventListener("click", function() {
@@ -59,13 +59,16 @@
                 <input type="date" id="date" name="date[]" class="date-field" required>
                 <input type="number" id="amount" name="amount[]" class="amount-field" placeholder="Amount" required>
                 <select name="category[]" id="category" class="category-field" required>
-                        <option value="Other">Other</option>
+                    ${categories.map(e => `<option value="${e}" ${e === 'Other' ? 'selected' : ''}>${e}</option>`).join('')}
                 </select>
                 <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
                 <button type="button" class="remove-btn">Remove</button>
             `;
 
             container.appendChild(newGroup);
+            document.querySelectorAll(".date-field").forEach(input => {
+                input.value = new Date().toISOString().split('T')[0];
+            });
         });
 
 
@@ -208,15 +211,21 @@
         async function loadCategories(){
             let data = await fetch('/categories');
             data = await data.json();
-            const select = document.getElementById("month");
-            data.forEach((month, index) => {
+            categories = data.data.categories;
+            const select = document.getElementsByClassName("category-field")[0];
+            data.data.categories.forEach(category => {
                 let option = document.createElement("option");
-                option.value = month;
-                option.text = month;
+                option.value = category;
+                option.text = category;
+                if(category === 'Other')    option.selected = true;
                 select.appendChild(option);
             });
         }
-        window.onload = loadExpenses(currentMonth)
+        // window.onload = loadExpenses(currentMonth);
+        window.onload = function(){
+            loadCategories();
+            loadExpenses(currentMonth);
+        };
     </script>
 </body>
 </html>

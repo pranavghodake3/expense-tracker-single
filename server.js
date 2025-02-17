@@ -4,6 +4,7 @@ const expenseRoute = require("./routes/expenseRoute");
 const homeRoute = require("./routes/homeRoute");
 const bodyParser = require('body-parser');
 const session = require("express-session");
+const { getCategories } = require("./controllers/expenseController");
 require("dotenv").config();
 
 const PORT = process.env.PORT ?? 5000;
@@ -22,6 +23,7 @@ app.use(express.static('public'));
 // Home Route - Show Posts
 app.get('/', homeRoute);
 app.use("/expenses", expenseRoute);
+app.get("/categories", getCategories);
 
 app.listen(PORT, () => {
     console.log("Server started on PORT: ", PORT)

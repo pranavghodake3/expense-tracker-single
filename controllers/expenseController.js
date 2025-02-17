@@ -11,6 +11,15 @@ const getExpenses = async (req, res) => {
     }
 };
 
+const getCategories = async (req, res) => {
+    try {
+        const response = await expenseService.getCategories();
+        return successResponse(res, response);
+    } catch (error) {
+        return errorResponse(res, error);
+    }
+};
+
 const addExpense = async (req, res) => {
     try {
         console.log("req.body: ",req.body)
@@ -28,4 +37,5 @@ const addExpense = async (req, res) => {
 module.exports = {
     getExpenses,
     addExpense,
+    getCategories,
 };

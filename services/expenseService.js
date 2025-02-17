@@ -57,23 +57,14 @@ const getExpenses = async(month = null) => {
   };
 };
 
-const getCategories = () => {
-  const categories = [
-      'Other',
-      'Extra Unplanned',
-      'Petrol',
-      'Fast food & Drink',
-      'Daaru',
-      'Bills & Utilities',
-      'Hotels',
-      'Shoping',
-      'Mutton Mase',
-      'Grocery',
-      'Entertainment',
-  ]
+const getCategories = async () => {
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `Categories!A:A`,
+  });
 
   return {
-      categories,
+      categories: response.data.values.map(e=> e[0])
   };
 };
 
