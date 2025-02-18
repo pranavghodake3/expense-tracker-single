@@ -19,41 +19,27 @@ const getExpenses = async(month = null) => {
     spreadsheetId: SPREADSHEET_ID,
     range: `${SHEET_NAME}!A:D`,
   });
-  let expenses = response.data.values.map(e => {
+  let expenses = response.data.values.map((e, index) => {
     const expense = {
-        date: e[0],
-        title: e[1],
-        amount: e[3],
-        category: e[2],
+      id: index,
+      date: e[0],
+      title: e[1],
+      category: e[2],
+      amount: e[3],
     };
-    return e.length == 0 || e[0] == 'Date' ? false : expense;
+    return expense;
   });
   expenses = expenses.filter(e => e);
   expenses.sort((a, b) => {
-    // Extract date part (ignoring the weekday)
     const parseDate = (str) => {
       let [, day, month, year] = str.match(/(\d{2})-(\d{2})-(\d{2})/);
-      return new Date(`20${year}-${month}-${day}`); // Convert to full year format (e.g., 2025)
+      return new Date(`20${year}-${month}-${day}`);
     };
     return parseDate(b.date) - parseDate(a.date);
   });
-  const categories = [
-      'Other',
-      'Extra Unplanned',
-      'Petrol',
-      'Fast food & Drink',
-      'Daaru',
-      'Bills & Utilities',
-      'Hotels',
-      'Shoping',
-      'Mutton Mase',
-      'Grocery',
-      'Entertainment',
-  ]
 
   return {
       expenses,
-      categories
   };
 };
 
@@ -76,7 +62,7 @@ const addExpense = async(body) => {
     const SHEET_NAME = `${currentMonth} ${currentYear}`;
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A3:D3`,
+      range: `${SHEET_NAME}!A:D`,
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
@@ -98,6 +84,22 @@ const addExpense = async(body) => {
     return data;
 };
 
+const updateExpense = async(id, body) => {
+  const { category, amount, date, description, month } = body;
+  const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
+  const SHEET_NAME = `${month} ${currentYear}`;
+  const data = await sheets.spreadsheets.values.update({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A${id+1}:D${id+1}`,
+      valueInputOption: "RAW",
+      requestBody: {
+          values: [[formatDate(date), description, category, parseFloat(amount)]],
+      },
+  });
+
+  return data;
+};
+
 function formatDate(dateString) {
     const date = new Date(dateString);
     
@@ -114,4 +116,5 @@ module.exports = {
     getExpenses,
     addExpense,
     getCategories,
+    updateExpense,
 };

@@ -34,8 +34,21 @@ const addExpense = async (req, res) => {
     }
 };
 
+const updateExpense = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const response = await expenseService.updateExpense(id, req.body);
+        req.session.formData = { success: true, message: "Expense updated successfully!" };
+        return successResponse(res, response);
+    } catch (error) {
+        req.session.formData = { success: false, message: error.message };
+        return errorResponse(res, error);
+    }
+};
+
 module.exports = {
     getExpenses,
     addExpense,
     getCategories,
+    updateExpense,
 };

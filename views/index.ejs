@@ -52,7 +52,6 @@
 
         document.getElementById("addField").addEventListener("click", function() {
             const container = document.getElementById("fieldsContainer");
-
             const newGroup = document.createElement("div");
             newGroup.classList.add("single-expense-form");
             newGroup.innerHTML = `
@@ -64,17 +63,14 @@
                 <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
                 <button type="button" class="remove-btn">Remove</button>
             `;
-
             container.appendChild(newGroup);
             document.querySelectorAll(".date-field").forEach(input => {
                 input.value = new Date().toISOString().split('T')[0];
             });
         });
 
-
         document.getElementById("add-expense-form").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Prevent default form submission
-            
+            event.preventDefault();
             const formDataArray = [];
             const dateFields = document.querySelectorAll(".date-field");
             const amountFields = document.querySelectorAll(".amount-field");
@@ -91,14 +87,6 @@
                     description: descriptionFields[index].value
                 });
             });
-            console.log("formDataArray: ",formDataArray)
-            // const formData = {
-            //     date: this.date.value,
-            //     amount: this.amount.value,
-            //     category: this.category.value,
-            //     description: this.description.value,
-            // };
-            
             let formSubmitData = await fetch("/expenses", {
                 method: "POST",
                 headers: {
@@ -113,39 +101,22 @@
             // document.getElementById('add-expense-form').classList.add('hide');
             document.getElementById('add-expense').classList.remove('hide');
             document.getElementById('add-expense-form').style.display = 'none';
-            // document.getElementById('add-expense').style.display = 'block';
         }
         function onAddExpenseClick(event){
-            // document.getElementById('add-expense-form').classList.remove('hide');
             event.classList.add('hide');
             document.getElementById('add-expense-form').style.display = 'block';
-            // event.style.display = 'none';
         }
         document.getElementById("date").value = new Date().toISOString().split('T')[0];
-        const formStatusMessage = "<%= formData?.message ?? '' %>";
-        showStatusMessage(formStatusMessage, "<%= formData?.success ?? '' %>");
-        // if(formStatusMessage){
-        //     const formStatus = "<%= formData?.success ?? '' %>";
-        //     const formStatusElement = document.getElementById('form-status');
-        //     formStatusElement.innerHTML = formStatusMessage;
-        //     formStatusElement.classList.remove('hide');
-        //     formStatusElement.classList.add(formStatus);
-        //     setTimeout(() => {
-        //         formStatusElement.style.display = "none";
-        //         formStatusElement.classList.add('hide');
-        //     }, formStatus === "true" ? 2000 : 10000);
-        // }
+        // const formStatusMessage = "<%= formData?.message ?? '' %>";
+        // showStatusMessage(formStatusMessage, "<%= formData?.success ?? '' %>");
         function showStatusMessage(formStatusMessage, formStatus){
             const formStatusElement = document.getElementById('form-status');
             formStatusElement.classList.remove('hide');
             if(formStatusMessage){
-                // const formStatus = "<%= formData?.success ?? '' %>";
-                
                 formStatusElement.innerHTML = formStatusMessage;
                 formStatusElement.classList.remove('hide');
                 formStatusElement.classList.add(formStatus);
                 setTimeout(() => {
-                    // formStatusElement.style.display = "none";
                     formStatusElement.classList.add('hide');
                 }, formStatus === "true" ? 2000 : 10000);
             }
