@@ -14,12 +14,11 @@
         <form action="/expenses" id="add-expense-form" class="" method="POST">
             <div id="fieldsContainer">
                 <div class="single-expense-form">
-                    <input type="date" id="date" name="date[]" class="date-field" required>
-                    <input type="number" id="amount" name="amount[]" class="amount-field" placeholder="Amount" required>
-                    <select name="category[]" id="category" class="category-field" required>
+                    <input type="date" name="date[]" class="date-field" required>
+                    <input type="number" name="amount[]" class="amount-field" placeholder="Amount" required>
+                    <select name="category[]" class="category-field" required>
                     </select>
-                    <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
-                    <button type="button" class="remove-btn">Remove</button>
+                    <input type="text" name="description[]" class="description-field" placeholder="Description">
                 </div>
             </div>
             <button type="button" id="addField">Add More</button>
@@ -55,18 +54,23 @@
             const newGroup = document.createElement("div");
             newGroup.classList.add("single-expense-form");
             newGroup.innerHTML = `
-                <input type="date" id="date" name="date[]" class="date-field" required>
-                <input type="number" id="amount" name="amount[]" class="amount-field" placeholder="Amount" required>
-                <select name="category[]" id="category" class="category-field" required>
+                <input type="date" name="date[]" class="date-field" required>
+                <input type="number" name="amount[]" class="amount-field" placeholder="Amount" required>
+                <select name="category[]" class="category-field" required>
                     ${categories.map(e => `<option value="${e}" ${e === 'Other' ? 'selected' : ''}>${e}</option>`).join('')}
                 </select>
-                <input type="text" id="description" name="description[]" class="description-field" placeholder="Description">
+                <input type="text" name="description[]" class="description-field" placeholder="Description">
                 <button type="button" class="remove-btn">Remove</button>
             `;
             container.appendChild(newGroup);
             document.querySelectorAll(".date-field").forEach(input => {
                 input.value = new Date().toISOString().split('T')[0];
             });
+        });
+        document.getElementById("fieldsContainer").addEventListener("click", function (event) {
+            if (event.target.classList.contains("remove-btn")) {
+                event.target.parentElement.remove();
+            }
         });
 
         document.getElementById("add-expense-form").addEventListener("submit", async function(event) {
@@ -106,7 +110,9 @@
             event.classList.add('hide');
             document.getElementById('add-expense-form').style.display = 'block';
         }
-        document.getElementById("date").value = new Date().toISOString().split('T')[0];
+        document.querySelectorAll(".date-field").forEach(input => {
+            input.value = new Date().toISOString().split('T')[0];
+        });
         // const formStatusMessage = "<%= formData?.message ?? '' %>";
         // showStatusMessage(formStatusMessage, "<%= formData?.success ?? '' %>");
         function showStatusMessage(formStatusMessage, formStatus){
