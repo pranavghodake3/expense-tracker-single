@@ -10,7 +10,7 @@ body {
     padding-top: 5px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 500px;
+    /* width: 500px; */
     margin: auto;
     text-align: center;
 }
@@ -18,7 +18,7 @@ form {
     display: flex;
     flex-direction: column;
 }
-input, select, textarea {
+/* input, select, textarea {
     margin-bottom: 10px;
     padding: 8px;
     font-size: 16px;
@@ -33,6 +33,18 @@ button {
 }
 button:hover {
     background: #218838;
+} */
+select, input, button {
+    /* width: 100%; */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    cursor: pointer;
+    font-size: 16px;
 }
 table {
     width: 100%;
@@ -86,4 +98,19 @@ form#add-expense-form{
 }
 table{
     font-size: 13px;
+}
+.action-btns {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-btn, .delete-btn, .update-btn, .cancel-btn {
+    padding: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 4px;
+}
+.content.hide, .content-html.hide, .update-btn.hide, .edit-btn.hide, .cancel-btn.hide{
+    display: none;
 }

@@ -23,7 +23,7 @@ const getExpenses = async(month = null) => {
     const expense = {
       id: index,
       date: e[0],
-      title: e[1],
+      description: e[1],
       category: e[2],
       amount: e[3],
     };
@@ -87,7 +87,7 @@ const addExpense = async(body) => {
 const updateExpense = async(id, body) => {
   const { category, amount, date, description, month } = body;
   const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
-  const SHEET_NAME = `${month} ${currentYear}`;
+  const SHEET_NAME = `${currentMonth} ${currentYear}`;
   const data = await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A${id+1}:D${id+1}`,
