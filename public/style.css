@@ -10,12 +10,12 @@ body {
     padding-top: 5px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    /* width: 500px; */
+    width: 50%;
     margin: auto;
     text-align: center;
 }
 form {
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
 }
 /* input, select, textarea {
@@ -76,7 +76,7 @@ th {
     font-size: 20px;
     font-weight: bold;
 }
-form#add-expense-form{
+form#add-expense-form.hide{
     display: none;
 }
 #add-expense.hide{
@@ -113,4 +113,36 @@ table{
 }
 .content.hide, .content-html.hide, .update-btn.hide, .edit-btn.hide, .cancel-btn.hide{
     display: none;
+}
+
+
+
+.amount-field{
+    width: 80px;
+}
+.single-expense-form {
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    gap: 10px; /* Add spacing between inputs */
+    margin-bottom: 10px; /* Optional: Add space between rows */
+}
+
+.single-expense-form input,
+.single-expense-form select,
+.single-expense-form button {
+    padding: 8px;
+    font-size: 14px;
+}
+
+.single-expense-form .remove-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.single-expense-form .remove-btn:hover {
+    background-color: darkred;
 }

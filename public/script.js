@@ -66,13 +66,14 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     showStatusMessage("Added Successfully!", 'true');
 });
 function onCancelClick(event){
-    // document.getElementById('add-expense-form').classList.add('hide');
+    document.getElementById('add-expense-form').classList.add('hide');
     document.getElementById('add-expense').classList.remove('hide');
-    document.getElementById('add-expense-form').style.display = 'none';
+    // document.getElementById('add-expense-form').style.display = 'none';
 }
 function onAddExpenseClick(event){
     event.classList.add('hide');
-    document.getElementById('add-expense-form').style.display = 'block';
+    document.getElementById('add-expense-form').classList.add('hide');
+    // document.getElementById('add-expense-form').style.display = 'block';
 }
 document.querySelectorAll(".date-field").forEach(input => {
     input.value = new Date().toISOString().split('T')[0];
