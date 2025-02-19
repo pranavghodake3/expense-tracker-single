@@ -39,12 +39,14 @@ document.getElementById("fieldsContainer").addEventListener("click", function (e
 
 document.getElementById("add-expense-form").addEventListener("submit", async function(event) {
     event.preventDefault();
+    const submitButton = document.getElementById("submit-btn");
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
     const formDataArray = [];
     const dateFields = document.querySelectorAll(".date-field");
     const amountFields = document.querySelectorAll(".amount-field");
     const categoryFields = document.querySelectorAll(".category-field");
     const descriptionFields = document.querySelectorAll(".description-field");
-    console.log("dateFields: ",dateFields)
 
     // Collect data from each form field group
     dateFields.forEach((dateField, index) => {
@@ -62,8 +64,14 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
         },
         body: JSON.stringify(formDataArray),
     });
-    console.log("formSubmitData: ",formSubmitData)
-    showStatusMessage("Added Successfully!", 'true');
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        showStatusMessage("Added Successfully!", 'true');
+    }else{
+        showStatusMessage(formSubmitData.error, 'false');
+    }
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit";
 });
 function onCancelClick(event){
     document.getElementById('add-expense-form').classList.add('hide');
@@ -72,7 +80,7 @@ function onCancelClick(event){
 }
 function onAddExpenseClick(event){
     event.classList.add('hide');
-    document.getElementById('add-expense-form').classList.add('hide');
+    document.getElementById('add-expense-form').classList.remove('hide');
     // document.getElementById('add-expense-form').style.display = 'block';
 }
 document.querySelectorAll(".date-field").forEach(input => {
@@ -87,7 +95,7 @@ function showStatusMessage(formStatusMessage, formStatus){
         formStatusElement.classList.add(formStatus);
         setTimeout(() => {
             formStatusElement.classList.add('hide');
-        }, formStatus === "true" ? 2000 : 10000);
+        }, formStatus === "true" ? 1000 : 2000);
     }
 }
 
@@ -228,8 +236,10 @@ async function updateExpense(button) {
         tr.querySelector('.description-content').innerHTML = description;
         tr.querySelector('.category-content').innerHTML = category;
         tr.querySelector('.amount-content').innerHTML = amount;
+        showStatusMessage('Updated successfuly!', 'true');
+    }else{
+        showStatusMessage(formSubmitData.error, 'false');
     }
-    console.log("formSubmitData: ",formSubmitData)
 }
 function cancelEditExpense(button) {
     let tr = button.closest('tr');
@@ -245,6 +255,8 @@ function cancelEditExpense(button) {
 }
 async function deleteExpense(button) {
     let tr = button.closest('tr');
+    button.disabled = true;
+    button.textContent = "Deleting...";
     const id = tr.querySelector('.id-field').value;
     let formSubmitData = await fetch("/expenses/"+id, {
         method: "DELETE",
@@ -260,7 +272,12 @@ async function deleteExpense(button) {
             }
         });
         tr.remove();
+        showStatusMessage('Deleted successfuly!', 'true');
+    }else{
+        showStatusMessage(formSubmitData.error, 'false');
     }
+    button.disabled = false;
+    button.textContent = "Delete";
 }
 
 async function onMonthChange(event){

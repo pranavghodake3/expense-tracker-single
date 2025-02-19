@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <p id="form-status" class="hide"></p>
-        <form action="/expenses" id="add-expense-form" class="" method="POST">
+        <form action="/expenses" id="add-expense-form" class="hide" method="POST">
             <div id="fieldsContainer">
                 <div class="single-expense-form">
                     <input type="date" name="date[]" class="date-field" required>
@@ -19,7 +19,7 @@
                 </div>
             </div>
             <button type="button" id="addField">Add More</button>
-            <button type="submit">Submit</button>
+            <button type="submit" id="submit-btn">Submit</button>
             <button type="button" onclick="onCancelClick(this);">Cancel</button>
         </form>
         <button type="button" id="add-expense" onclick="onAddExpenseClick(this);">Add Expense</button>

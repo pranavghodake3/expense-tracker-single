@@ -134,13 +134,8 @@ async function deleteExpense(id) {
     },
     // auth: authClient,
   };
-
-  try {
-    const response = await sheets.spreadsheets.batchUpdate(request);
-    console.log('Row deleted successfully', response.data);
-  } catch (error) {
-    console.error('Error deleting row:', error);
-  }
+  const response = await sheets.spreadsheets.batchUpdate(request);
+  return response;
 }
 
 function formatDate(dateString) {
