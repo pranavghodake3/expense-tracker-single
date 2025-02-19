@@ -24,7 +24,7 @@ document.getElementById("addField").addEventListener("click", function() {
             ${categories.map(e => `<option value="${e}" ${e === 'Other' ? 'selected' : ''}>${e}</option>`).join('')}
         </select>
         <input type="text" name="description[]" class="description-field" placeholder="Description">
-        <button type="button" class="remove-btn">Remove</button>
+        <button type="button" class="remove-btn"></button>
     `;
     container.appendChild(newGroup);
     document.querySelectorAll(".date-field").forEach(input => {
@@ -191,7 +191,7 @@ async function loadExpenses(month){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
-        document.getElementById("sum").innerHTML = sum.toLocaleString();
+        document.getElementById("sum").innerHTML = sum.toLocaleString()+" Rs.";
     }else{
         showStatusMessage(data.error, 'false');
     }
@@ -325,7 +325,7 @@ async function loadCategories(){
         select.appendChild(option);
     });
 }
-// window.onload = loadExpenses(currentMonth);
+
 window.onload = async function(){
     await loadCategories();
     await loadExpenses(currentMonth);

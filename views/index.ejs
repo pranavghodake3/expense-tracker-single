@@ -22,14 +22,14 @@
             <button type="submit" id="submit-btn">Submit</button>
             <button type="button" onclick="onCancelClick(this);">Cancel</button>
         </form>
-        <button type="button" id="add-expense-btn" onclick="onAddExpenseClick(this);">Add Expense</button>
         <div class="expense-info">
+            <button type="button" id="add-expense-btn" onclick="onAddExpenseClick(this);">Add Expense</button>
             <b id="currentYear"></b>
             <select name="month" id="month" onchange="onMonthChange(this)"></select>
             : <b id="sum"></b>
+            <button type="button" id="show-stats-btn" onclick="showStatus(this);">Show Stats</button>
+            <button type="button" id="hide-stats-btn" class="hide" onclick="hideStatus(this);">Hide Stats</button>
         </div>
-        <button type="button" id="show-stats-btn" onclick="showStatus(this);">Show Stats</button>
-        <button type="button" id="hide-stats-btn" class="hide" onclick="hideStatus(this);">Hide Stats</button>
         <div id="stats" class="hide">
             <table id="stats-table">
                 <thead>

@@ -1,0 +1,221 @@
+body {
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+.container {
+    background: white;
+    padding-top: 5px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 50%;
+    margin: auto;
+    text-align: center;
+}
+form {
+    /* display: flex; */
+    flex-direction: column;
+}
+/* input, select, textarea {
+    margin-bottom: 10px;
+    padding: 8px;
+    font-size: 16px;
+}
+button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+button:hover {
+    background: #218838;
+} */
+select, input, button {
+    /* width: 100%; */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    cursor: pointer;
+    font-size: 16px;
+}
+table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+th {
+    background: #28a745;
+    color: white;
+}
+#form-status.true{
+    background-color: #7cd57c;
+    padding: 5px;
+}
+#form-status.false{
+    background-color: #edb3b3;
+    padding: 5px;
+}
+#form-status.hide{
+    display: none;
+}
+#expense-tracker-title{
+    margin: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+form#add-expense-form.hide{
+    display: none;
+}
+#add-expense-btn.hide, #show-stats-btn.hide, #hide-stats-btn.hide{
+    display: none;
+}
+.expense-info{
+    margin-top: 5px;
+}
+.expense-info select{
+    margin-bottom: 0;
+    padding: 2px;
+}
+#expenses td:nth-child(4) {
+    text-align: center;
+}
+#add-expense-btn, #show-stats-btn, #hide-stats-btn{
+    padding: 2px;
+    font-size: 12px;
+}
+table{
+    font-size: 13px;
+}
+.action-btns {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-btn, .delete-btn, .update-btn, .cancel-btn {
+    padding: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 4px;
+}
+.content.hide, .content-html.hide, .update-btn.hide, .edit-btn.hide, .cancel-btn.hide{
+    display: none;
+}
+
+
+
+.amount-field{
+    width: 80px;
+}
+.single-expense-form {
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    gap: 10px; /* Add spacing between inputs */
+    margin-bottom: 10px; /* Optional: Add space between rows */
+}
+
+.single-expense-form input,
+.single-expense-form select,
+.single-expense-form button {
+    padding: 8px;
+    font-size: 14px;
+}
+
+.single-expense-form .remove-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.single-expense-form .remove-btn:hover {
+    background-color: darkred;
+}
+#stats{
+    width: 50%;
+    margin: auto;
+}
+#stats.hide{
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Container Styling */
+.container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto; /* Enable horizontal scrolling on small screens */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Ensures proper spacing even on small screens */
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+    white-space: nowrap; /* Prevents text from wrapping */
+}
+
+/* Make table headers stand out */
+th {
+    background-color: #f4f4f4;
+}
+
+/* Ensure proper spacing on smaller screens */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 5px;
+    }
+
+    table {
+        min-width: 100%; /* Adjusts based on screen size */
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 14px; /* Reduce text size for better visibility */
+    }
+}
+
