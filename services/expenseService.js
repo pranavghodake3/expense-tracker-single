@@ -85,8 +85,8 @@ const addExpense = async(body) => {
 };
 
 const updateExpense = async(id, body) => {
-  const { category, amount, date, description, month } = body;
-  const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
+  const { category, amount, date, description, currentMonth } = body;
+  // const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
   const SHEET_NAME = `${currentMonth} ${currentYear}`;
   const data = await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
@@ -99,6 +99,49 @@ const updateExpense = async(id, body) => {
 
   return data;
 };
+
+async function getSheetId(sheetName) {
+  const sheetMetadata = await sheets.spreadsheets.get({
+      spreadsheetId: SPREADSHEET_ID,
+      // auth: authClient,
+  });
+
+  const sheet = sheetMetadata.data.sheets.find(s => s.properties.title === sheetName);
+  return sheet ? sheet.properties.sheetId : null;
+}
+
+async function deleteExpense(id) {
+  // const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
+  const currentMonth = 'Mar'
+  const SHEET_NAME = `${currentMonth} ${currentYear}`;
+  // const authClient = await auth.getClient();
+
+  const request = {
+    spreadsheetId: SPREADSHEET_ID,
+    resource: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: await getSheetId(SHEET_NAME),    // Sheet ID (not name)
+              dimension: 'ROWS',    // Delete a row
+              startIndex: ((id+1) - 1), // Zero-based index
+              endIndex: (id+1),  // Delete only this row
+            },
+          },
+        },
+      ],
+    },
+    // auth: authClient,
+  };
+
+  try {
+    const response = await sheets.spreadsheets.batchUpdate(request);
+    console.log('Row deleted successfully', response.data);
+  } catch (error) {
+    console.error('Error deleting row:', error);
+  }
+}
 
 function formatDate(dateString) {
     const date = new Date(dateString);
@@ -117,4 +160,5 @@ module.exports = {
     addExpense,
     getCategories,
     updateExpense,
+    deleteExpense,
 };

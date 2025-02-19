@@ -1,6 +1,16 @@
 
 const allExpenses = {};
 let categories = [];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const select = document.getElementById("month");
+months.forEach((month, index) => {
+    let option = document.createElement("option");
+    option.value = month;
+    option.text = month;
+    select.appendChild(option);
+});
+let currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
+select.value = currentMonth;
 document.getElementById("currentYear").innerHTML = new Date().getFullYear().toString();
 
 document.getElementById("addField").addEventListener("click", function() {
@@ -88,7 +98,6 @@ async function loadExpenses(month){
     cell1.colSpan = 5;
     cell1.style.textAlign  = "center";
     cell1.textContent = "Loadding...";
-    // expensesTbody.innerHTML = 'Loadding...';
     let data = await fetch('/expenses?month='+month);
     data = await data.json();
     if(data.status){
@@ -104,20 +113,19 @@ async function loadExpenses(month){
                 let cell3 = row.insertCell(3);
                 let cell4 = row.insertCell(4);
                 cell0.innerHTML = `
-                    <div class="content">${item.date}</div>
+                    <div class="content date-content">${item.date}</div>
                     <div class="content-html hide">
                         <input type="date" name="date[]" class="date-field" value="${new Date().toISOString().split('T')[0]}" required>
                     </div>
                 `;
-                // cell0.querySelector('.date-field').value = new Date(item.date).toISOString().split('T')[0];
                 cell1.innerHTML = `
-                    <div class="content">${item.description}</div>
+                    <div class="content description-content">${item.description}</div>
                     <div class="content-html hide">
                         <input type="text" name="description[]" class="description-field" placeholder="Description" value="${item.description}">
                     </div>
                     `;
                 cell2.innerHTML = `
-                    <div class="content">${item.category}</div>
+                    <div class="content category-content">${item.category}</div>
                     <div class="content-html hide">
                         <select name="category[]" class="category-field" required>
                             ${categories.map(e => `<option value="${e}" ${e === item.category ? 'selected' : ''}>${e}</option>`).join('')}
@@ -125,7 +133,7 @@ async function loadExpenses(month){
                     </div>
                 `;
                 cell3.innerHTML = `
-                    <div class="content">${item.amount}</div>
+                    <div class="content amount-content">${item.amount}</div>
                     <div class="content-html hide">
                         <input type="number" name="amount[]" class="amount-field" placeholder="Amount" value="${parseFloat(item.amount)}" required>
                     </div>`;
@@ -133,9 +141,9 @@ async function loadExpenses(month){
                         <div class="action-btns">
                             <input type="hidden" name="id" class="id-field" value="${item.id}">
                             <button class="edit-btn" onclick="editExpense(this)">Edit</button>
-                            <button class="update-btn" onclick="updateExpense(this)">Update</button>
-                            <button class="cancel-btn" onclick="cancelEditExpense(this)">Cancel</button>
-                            <button class="delete-btn">Delete</button>
+                            <button class="update-btn hide" onclick="updateExpense(this)">Update</button>
+                            <button class="cancel-btn hide" onclick="cancelEditExpense(this)">Cancel</button>
+                            <button class="delete-btn"  onclick="deleteExpense(this)">Delete</button>
                         </div>
                     </td>`;
                 sum += parseFloat(item.amount);
@@ -152,6 +160,24 @@ async function loadExpenses(month){
         showStatusMessage(data.error, 'false');
     }
 }
+function formatDate(dateString, standard = true) {
+    let formattedDate = '';
+    if(standard){
+        let parts = dateString.split(', ')[1];
+        let [day, month, year] = parts.split('-');
+        year = parseInt(year, 10) < 50 ? '20' + year : '19' + year;
+        formattedDate = `${year}-${month}-${day}`;
+    }else{
+        const date = new Date(dateString);
+        const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = String(date.getFullYear()).slice(-2);
+        formattedDate = `${weekday}, ${day}-${month}-${year}`;
+    }
+
+    return formattedDate;
+}
 function editExpense(button) {
     let tr = button.closest('tr');
     tr.querySelector('.edit-btn').classList.add('hide');
@@ -163,6 +189,14 @@ function editExpense(button) {
     tr.querySelectorAll(".content-html").forEach(contentHtmlDiv => {
         contentHtmlDiv.style.display = 'block';
     });
+    const date = tr.querySelector('.date-content').innerHTML;
+    const description = tr.querySelector('.description-content').innerHTML;
+    const category = tr.querySelector('.category-content').innerHTML;
+    const amount = tr.querySelector('.amount-content').innerHTML;
+    tr.querySelector('.date-field').value = new Date(formatDate(date)).toISOString().split('T')[0];
+    tr.querySelector('.description-field').value = description;
+    tr.querySelector('.category-field').value = category;
+    tr.querySelector('.amount-field').value = amount;
 }
 async function updateExpense(button) {
     let tr = button.closest('tr');
@@ -185,8 +219,15 @@ async function updateExpense(button) {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({date, description, category, amount}),
+        body: JSON.stringify({date, description, category, amount, currentMonth}),
     });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        tr.querySelector('.date-content').innerHTML = formatDate(date, false);
+        tr.querySelector('.description-content').innerHTML = description;
+        tr.querySelector('.category-content').innerHTML = category;
+        tr.querySelector('.amount-content').innerHTML = amount;
+    }
     console.log("formSubmitData: ",formSubmitData)
 }
 function cancelEditExpense(button) {
@@ -201,19 +242,28 @@ function cancelEditExpense(button) {
         contentHtmlDiv.style.display = 'none';
     });
 }
+async function deleteExpense(button) {
+    let tr = button.closest('tr');
+    const id = tr.querySelector('.id-field').value;
+    let formSubmitData = await fetch("/expenses/"+id, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        document.querySelectorAll(".id-field").forEach(input => {
+            if(input.value > id){
+                input.value -= 1;
+            }
+        });
+        tr.remove();
+    }
+}
 
-// Month
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const select = document.getElementById("month");
-months.forEach((month, index) => {
-    let option = document.createElement("option");
-    option.value = month;
-    option.text = month;
-    select.appendChild(option);
-});
-const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
-select.value = currentMonth;
 async function onMonthChange(event){
+    currentMonth = event.value;
     await loadExpenses(event.value);
 }
 async function loadCategories(){

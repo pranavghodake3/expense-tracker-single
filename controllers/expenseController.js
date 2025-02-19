@@ -46,9 +46,22 @@ const updateExpense = async (req, res) => {
     }
 };
 
+const deleteExpense = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const response = await expenseService.deleteExpense(id);
+        req.session.formData = { success: true, message: "Expense deleted successfully!" };
+        return successResponse(res, response);
+    } catch (error) {
+        req.session.formData = { success: false, message: error.message };
+        return errorResponse(res, error);
+    }
+};
+
 module.exports = {
     getExpenses,
     addExpense,
     getCategories,
     updateExpense,
+    deleteExpense,
 };
