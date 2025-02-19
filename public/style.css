@@ -79,7 +79,7 @@ th {
 form#add-expense-form.hide{
     display: none;
 }
-#add-expense.hide{
+#add-expense-btn.hide, #show-stats-btn.hide, #hide-stats-btn.hide{
     display: none;
 }
 .expense-info{
@@ -92,7 +92,7 @@ form#add-expense-form.hide{
 #expenses td:nth-child(4) {
     text-align: center;
 }
-#add-expense{
+#add-expense-btn, #show-stats-btn, #hide-stats-btn{
     padding: 2px;
     font-size: 12px;
 }
@@ -145,4 +145,11 @@ table{
 
 .single-expense-form .remove-btn:hover {
     background-color: darkred;
+}
+#stats{
+    width: 50%;
+    margin: auto;
+}
+#stats.hide{
+    display: none;
 }

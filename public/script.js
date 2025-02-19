@@ -75,13 +75,39 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
 });
 function onCancelClick(event){
     document.getElementById('add-expense-form').classList.add('hide');
-    document.getElementById('add-expense').classList.remove('hide');
+    document.getElementById('add-expense-btn').classList.remove('hide');
     // document.getElementById('add-expense-form').style.display = 'none';
 }
 function onAddExpenseClick(event){
     event.classList.add('hide');
     document.getElementById('add-expense-form').classList.remove('hide');
     // document.getElementById('add-expense-form').style.display = 'block';
+}
+function showStatus(button){
+    button.classList.add("hide");
+    document.getElementById('hide-stats-btn').classList.remove("hide");
+    document.getElementById('stats').classList.remove("hide");
+}
+function loadStats(changedMonth){
+    const stats = {};
+    allExpenses[changedMonth].forEach(e => {
+        if(typeof stats[e.category] == 'undefined') stats[e.category] = 0;
+        stats[e.category] += parseFloat(e.amount);
+    });
+    const statsTableBody = document.getElementById("stats-table-body");
+    statsTableBody.innerHTML = '';
+    for (const key in stats) {
+        let row = statsTableBody.insertRow();
+        let cell1 = row.insertCell(0);
+        let cell2 = row.insertCell(1);
+        cell1.innerHTML = key;
+        cell2.innerHTML = stats[key].toLocaleString();
+    }
+}
+function hideStatus(button){
+    button.classList.add("hide");
+    document.getElementById('show-stats-btn').classList.remove("hide");
+    document.getElementById('stats').classList.add("hide");
 }
 document.querySelectorAll(".date-field").forEach(input => {
     input.value = new Date().toISOString().split('T')[0];
@@ -157,6 +183,7 @@ async function loadExpenses(month){
                     </td>`;
                 sum += parseFloat(item.amount);
             });
+            loadStats(month);
         }else{
             let row = expensesTbody.insertRow();
             let cell1 = row.insertCell(0);
@@ -283,6 +310,7 @@ async function deleteExpense(button) {
 async function onMonthChange(event){
     currentMonth = event.value;
     await loadExpenses(event.value);
+    loadStats(event.value);
 }
 async function loadCategories(){
     let data = await fetch('/categories');

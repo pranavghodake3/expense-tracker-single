@@ -22,11 +22,35 @@
             <button type="submit" id="submit-btn">Submit</button>
             <button type="button" onclick="onCancelClick(this);">Cancel</button>
         </form>
-        <button type="button" id="add-expense" onclick="onAddExpenseClick(this);">Add Expense</button>
+        <button type="button" id="add-expense-btn" onclick="onAddExpenseClick(this);">Add Expense</button>
         <div class="expense-info">
             <b id="currentYear"></b>
             <select name="month" id="month" onchange="onMonthChange(this)"></select>
             : <b id="sum"></b>
+        </div>
+        <button type="button" id="show-stats-btn" onclick="showStatus(this);">Show Stats</button>
+        <button type="button" id="hide-stats-btn" class="hide" onclick="hideStatus(this);">Hide Stats</button>
+        <div id="stats" class="hide">
+            <table id="stats-table">
+                <thead>
+                    <th>Category</th>
+                    <th>Total</th>
+                </thead>
+                <tbody id="stats-table-body">
+                    <tr>
+                        <td>Hotels</td>
+                        <td>5,000</td>
+                    </tr>
+                    <tr>
+                        <td>Petrol</td>
+                        <td>4,500</td>
+                    </tr>
+                    <tr>
+                        <td>Hotels</td>
+                        <td>4,720</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <table>
             <thead>
