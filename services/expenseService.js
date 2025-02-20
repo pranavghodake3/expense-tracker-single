@@ -19,7 +19,8 @@ const getExpenses = async(month = null) => {
     spreadsheetId: SPREADSHEET_ID,
     range: `${SHEET_NAME}!A:D`,
   });
-  let expenses = response.data.values.map((e, index) => {
+  console.log("response: ",response.data)
+  let expenses = response?.data?.values ? response?.data?.values.map((e, index) => {
     const expense = {
       id: index,
       date: e[0],
@@ -28,7 +29,7 @@ const getExpenses = async(month = null) => {
       amount: e[3],
     };
     return expense;
-  });
+  }) : [];
   expenses = expenses.filter(e => e);
   expenses.sort((a, b) => {
     const parseDate = (str) => {

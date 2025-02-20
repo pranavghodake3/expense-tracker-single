@@ -193,6 +193,7 @@ async function loadExpenses(month){
         }
         document.getElementById("sum").innerHTML = sum.toLocaleString()+" Rs.";
     }else{
+        cell1.textContent = data.error;
         showStatusMessage(data.error, 'false');
     }
 }
