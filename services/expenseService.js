@@ -11,6 +11,60 @@ const sheets = google.sheets({ version: "v4", auth: client });
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const currentYear = new Date().getFullYear().toString().slice(-2);
 
+const express = require('express');
+const router = express.Router();
+
+// Route for the home page
+router.get('/', (req, res) => {
+    let expenses = [
+        {
+          date: '2025-02-16',
+          category: 'Cat2',
+          amount: 70,
+          title: 'Amrakhand'
+        },
+        {
+          date: '2025-02-18',
+          category: 'Others',
+          amount: 10,
+          title: 'Bike air'
+        },
+        {
+          date: '2025-02-16',
+          category: 'Others',
+          amount: 180,
+          title: 'Hair'
+        },
+        {
+          date: '2025-02-17',
+          category: 'Others',
+          amount: 10,
+          title: 'Bike air'
+        },
+        {
+          date: '2025-02-16',
+          category: 'Cat1',
+          amount: 60,
+          title: 'Eggs'
+        },
+    ];
+    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+    console.log(expenses);
+    const finalArr = {};
+    expenses.forEach(element => {
+    if (typeof finalArr[element.date] == 'undefined') finalArr[element.date] = [];
+    
+    finalArr[element.date].push(element);
+    });
+    console.log("finalArr: ",finalArr)
+    expenses = finalArr;
+      
+    res.json(expenses);
+});
+
+module.exports = router;
+
+
 const getExpenses = async(month = null) => {
   const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
   let SHEET_NAME = `${currentMonth} ${currentYear}`;
@@ -38,6 +92,13 @@ const getExpenses = async(month = null) => {
     };
     return parseDate(b.date) - parseDate(a.date);
   });
+  
+  const finalArr = {};
+  expenses.forEach(element => {
+    if (typeof finalArr[element.date] == 'undefined') finalArr[element.date] = [];
+    finalArr[element.date].push(element);
+  });
+  expenses = finalArr;
 
   return {
       expenses,

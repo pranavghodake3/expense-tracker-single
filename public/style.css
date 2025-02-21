@@ -1,124 +1,40 @@
-/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
+    background-color: #f4f4f4;
+    text-align: center;
 }
 
-.container {
-    max-width: 600px;
-    margin: 5px;
+h1 {
+    color: #333;
 }
-
-/* Form Styling */
-#add-expense-form {
-    background: #ffffff;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-#sum{
-    font-size: 20px;
-}
-
-.single-expense-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 0px 2px 0px;
-    border: 1px solid #ddd;
-}
-
-.single-expense-form .amount-field {
-    flex: 0.7;
-    min-width: 80px;
-}
-
-.single-expense-form input,
-.single-expense-form select {
-    flex: 1;
-    min-width: 100px;
-}
-
-.remove-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 13px;
-    color: red;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.remove-btn::before {
-    content: '\2716'; /* Unicode multiplication (×) symbol */
-}
-
-/* Buttons Styling */
-.btn {
-    padding: 8px 15px;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-#addField {
-    background-color: #28a745;
-}
-
-#submit-btn {
-    background-color: #007bff;
-}
-
-.btn-cancel {
-    background-color: #6c757d;
-}
-
-#add-expense-btn {
-    background-color: #17a2b8;
-}
-
-.btn-show-stats {
-    background-color: #ffc107;
-}
-
-.btn-hide-stats {
-    background-color: #dc3545;
-}
-
-/* Table Styling */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    font-size: 13px;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 2px;
+table{
     text-align: left;
 }
-
-th {
-    background-color: skyblue;
+.table-bordered {
+    border: 1px solid #ddd;
 }
-
-/* Responsive Table with Bootstrap */
-@media screen and (max-width: 768px) {
-    table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
+tr.date-row {
+    /* font-size: 11px; */
+    font-weight: bold;
+    color: green;
+    /* border: 2px solid #ddc0c0; */
+    /* background: #f1f0f0; */
 }
-
-#form-status.hide, form#add-expense-form.hide, #add-expense-btn.hide, #show-stats-btn.hide, #hide-stats-btn.hide, .content.hide, .content-html.hide, .update-btn.hide, .edit-btn.hide, .cancel-btn.hide, #stats.hide{
-    display: none;
+.title {
+    font-size: 14px;
+    font-weight: bold;
+}
+.category {
+    font-size: 12px;
+    color: brown;
+}
+.amount {
+    font-size: 14px;
+    font-weight: bold;
+}
+.expense-row td {
+    padding: 1px 0px 1px 6px !important;
+}
+.panel-heading.stats-title{
+    margin-top: 8px;
 }

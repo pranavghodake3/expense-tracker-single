@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <p id="form-status" class="hide"></p>
+        <form action="/expenses" id="add-expense-form" class="hide" method="POST">
+            <div id="fieldsContainer">
+                <div class="single-expense-form">
+                    <input type="date" name="date[]" class="date-field" required>
+                    <input type="number" name="amount[]" class="amount-field" placeholder="Amount" required>
+                    <select name="category[]" class="category-field" required></select>
+                    <input type="text" name="description[]" class="description-field" placeholder="Description">
+                </div>
+            </div>
+            <button type="button" id="addField">Add More</button>
+            <button type="submit" id="submit-btn">Submit</button>
+            <button type="button" onclick="onCancelClick(this);">Cancel</button>
+        </form>
+        <div class="expense-info">
+            <button type="button" id="add-expense-btn" onclick="onAddExpenseClick(this);">Add Expense</button>
+            <b id="currentYear"></b>
+            <select name="month" id="month" onchange="onMonthChange(this)"></select>
+            : <b id="sum"></b>
+            <button type="button" id="show-stats-btn" onclick="showStatus(this);">Show Stats</button>
+            <button type="button" id="hide-stats-btn" class="hide" onclick="hideStatus(this);">Hide Stats</button>
+        </div>
+        <div id="stats" class="hide">
+            <table id="stats-table">
+                <thead>
+                    <th>Category</th>
+                    <th>Total</th>
+                </thead>
+                <tbody id="stats-table-body">
+                    <tr>
+                        <td>Hotels</td>
+                        <td>5,000</td>
+                    </tr>
+                    <tr>
+                        <td>Petrol</td>
+                        <td>4,500</td>
+                    </tr>
+                    <tr>
+                        <td>Hotels</td>
+                        <td>4,720</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expenses"></tbody>
+        </table>
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>

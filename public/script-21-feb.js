@@ -89,52 +89,19 @@ function showStatus(button){
     document.getElementById('stats').classList.remove("hide");
 }
 function loadStats(changedMonth){
-    console.log("loadStats allExpenses: ",allExpenses)
     const stats = {};
-    let totalSum = 0;
-
-    for(let key in allExpenses[changedMonth]){
-        for(let i = 0; i < allExpenses[changedMonth][key].length; i++){
-            if(typeof stats[allExpenses[changedMonth][key][i].category] == 'undefined') stats[allExpenses[changedMonth][key][i].category] = 0;
-            stats[allExpenses[changedMonth][key][i].category] += parseFloat(allExpenses[changedMonth][key][i].amount);
-            totalSum += parseFloat(allExpenses[changedMonth][key][i].amount);
-        }
-    }
-    // allExpenses[changedMonth].forEach(e => {
-    //     if(typeof stats[e.category] == 'undefined') stats[e.category] = 0;
-    //     stats[e.category] += parseFloat(e.amount);
-    // });
-    // const statsTableBody = document.getElementById("stats-table-body");
-    // statsTableBody.innerHTML = '';
-    // for (const key in stats) {
-    //     let row = statsTableBody.insertRow();
-    //     let cell1 = row.insertCell(0);
-    //     let cell2 = row.insertCell(1);
-    //     cell1.innerHTML = key;
-    //     cell2.innerHTML = stats[key].toLocaleString();
-    // }
-    // for (const key in stats) {
-    //     const container = document.getElementById("stats-body");
-    //     const newGroup = document.createElement("div");
-    //     newGroup.classList.add("progress");
-    //     let categoryPercentage = Math.round((parseFloat(stats[key])/totalSum)*100);
-    //     newGroup.innerHTML = `
-    //         <div class="progress-bar" role="progressbar" aria-valuenow="${categoryPercentage}"
-    //         aria-valuemin="0" aria-valuemax="100" style="width:${categoryPercentage}%">${key} ${categoryPercentage}%</div>
-    //         <span class="badge">${stats[key].toLocaleString()}</span>
-    //     `;
-    //     container.appendChild(newGroup);
-    // }
-    const statsList = document.getElementById("stats-list");
+    allExpenses[changedMonth].forEach(e => {
+        if(typeof stats[e.category] == 'undefined') stats[e.category] = 0;
+        stats[e.category] += parseFloat(e.amount);
+    });
+    const statsTableBody = document.getElementById("stats-table-body");
+    statsTableBody.innerHTML = '';
     for (const key in stats) {
-        
-        const li = document.createElement("li");
-        li.classList.add("list-group-item");
-        let categoryPercentage = Math.round((parseFloat(stats[key])/totalSum)*100);
-        li.innerHTML = `
-            ${key} <span class="badge">${parseFloat(stats[key])}</span>
-        `;
-        statsList.appendChild(li);
+        let row = statsTableBody.insertRow();
+        let cell1 = row.insertCell(0);
+        let cell2 = row.insertCell(1);
+        cell1.innerHTML = key;
+        cell2.innerHTML = stats[key].toLocaleString();
     }
 }
 function hideStatus(button){
@@ -170,76 +137,52 @@ async function loadExpenses(month){
     data = await data.json();
     if(data.status){
         expensesTbody.innerHTML = '';
-        let totalSum = 0;
+        let sum = 0;
         allExpenses[month] = data.data.expenses;
-        const finalExpenses = data.data.expenses;
-        if(Object.entries(finalExpenses).length > 0){
-            for(let key in finalExpenses){
-                let sum = 0;
-                finalExpenses[key].forEach(e => { sum += parseFloat(e.amount); })
+        if(data.data.expenses.length > 0){
+            data.data.expenses.forEach(item => {
                 let row = expensesTbody.insertRow();
-                row.classList.add('date-row');
-                row.classList.add('active');
-                let cell_l = row.insertCell(0);
-                let cell_2 = row.insertCell(1);
-                cell_l.innerHTML = key;
-                cell_2.innerHTML = `<i class="bi bi-currency-rupee"></i> ${sum.toLocaleString()}`;
-                for(let i = 0; i < finalExpenses[key].length; i++){
-                    row = expensesTbody.insertRow();
-                    row.classList.add('expense-row');
-                    cell_l = row.insertCell(0);
-                    cell_2 = row.insertCell(1);
-                    cell_l.innerHTML = `
-                        <div class="title">${finalExpenses[key][i].description}</div>
-                        <div class="category">${finalExpenses[key][i].category}</div>
+                let cell0 = row.insertCell(0);
+                let cell1 = row.insertCell(1);
+                let cell2 = row.insertCell(2);
+                let cell3 = row.insertCell(3);
+                let cell4 = row.insertCell(4);
+                cell0.innerHTML = `
+                    <div class="content date-content">${item.date}</div>
+                    <div class="content-html hide">
+                        <input type="date" name="date[]" class="date-field" value="${new Date().toISOString().split('T')[0]}" required>
+                    </div>
+                `;
+                cell1.innerHTML = `
+                    <div class="content description-content">${item.description}</div>
+                    <div class="content-html hide">
+                        <input type="text" name="description[]" class="description-field" placeholder="Description" value="${item.description}">
+                    </div>
                     `;
-                    cell_2.innerHTML = `<div class="amount"><i class="bi bi-currency-rupee"></i>${finalExpenses[key][i].amount.toLocaleString()}</div>`;
-                }
-                totalSum += sum
-            }
-            // data.data.expenses.forEach(item => {
-            //     let row = expensesTbody.insertRow();
-            //     let cell0 = row.insertCell(0);
-            //     let cell1 = row.insertCell(1);
-            //     let cell2 = row.insertCell(2);
-            //     let cell3 = row.insertCell(3);
-            //     let cell4 = row.insertCell(4);
-            //     cell0.innerHTML = `
-            //         <div class="content date-content">${item.date}</div>
-            //         <div class="content-html hide">
-            //             <input type="date" name="date[]" class="date-field" value="${new Date().toISOString().split('T')[0]}" required>
-            //         </div>
-            //     `;
-            //     cell1.innerHTML = `
-            //         <div class="content description-content">${item.description}</div>
-            //         <div class="content-html hide">
-            //             <input type="text" name="description[]" class="description-field" placeholder="Description" value="${item.description}">
-            //         </div>
-            //         `;
-            //     cell2.innerHTML = `
-            //         <div class="content category-content">${item.category}</div>
-            //         <div class="content-html hide">
-            //             <select name="category[]" class="category-field" required>
-            //                 ${categories.map(e => `<option value="${e}" ${e === item.category ? 'selected' : ''}>${e}</option>`).join('')}
-            //             </select>
-            //         </div>
-            //     `;
-            //     cell3.innerHTML = `
-            //         <div class="content amount-content">${item.amount}</div>
-            //         <div class="content-html hide">
-            //             <input type="number" name="amount[]" class="amount-field" placeholder="Amount" value="${parseFloat(item.amount)}" required>
-            //         </div>`;
-            //     cell4.innerHTML = `<td>
-            //             <div class="action-btns">
-            //                 <input type="hidden" name="id" class="id-field" value="${item.id}">
-            //                 <button class="edit-btn" onclick="editExpense(this)">Edit</button>
-            //                 <button class="update-btn hide" onclick="updateExpense(this)">Update</button>
-            //                 <button class="cancel-btn hide" onclick="cancelEditExpense(this)">Cancel</button>
-            //                 <button class="delete-btn"  onclick="deleteExpense(this)">Delete</button>
-            //             </div>
-            //         </td>`;
-            //     sum += parseFloat(item.amount);
-            // });
+                cell2.innerHTML = `
+                    <div class="content category-content">${item.category}</div>
+                    <div class="content-html hide">
+                        <select name="category[]" class="category-field" required>
+                            ${categories.map(e => `<option value="${e}" ${e === item.category ? 'selected' : ''}>${e}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+                cell3.innerHTML = `
+                    <div class="content amount-content">${item.amount}</div>
+                    <div class="content-html hide">
+                        <input type="number" name="amount[]" class="amount-field" placeholder="Amount" value="${parseFloat(item.amount)}" required>
+                    </div>`;
+                cell4.innerHTML = `<td>
+                        <div class="action-btns">
+                            <input type="hidden" name="id" class="id-field" value="${item.id}">
+                            <button class="edit-btn" onclick="editExpense(this)">Edit</button>
+                            <button class="update-btn hide" onclick="updateExpense(this)">Update</button>
+                            <button class="cancel-btn hide" onclick="cancelEditExpense(this)">Cancel</button>
+                            <button class="delete-btn"  onclick="deleteExpense(this)">Delete</button>
+                        </div>
+                    </td>`;
+                sum += parseFloat(item.amount);
+            });
             loadStats(month);
         }else{
             let row = expensesTbody.insertRow();
@@ -248,7 +191,7 @@ async function loadExpenses(month){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
-        document.getElementById("totalSum").innerHTML = totalSum.toLocaleString()+" Rs.";
+        document.getElementById("sum").innerHTML = sum.toLocaleString()+" Rs.";
     }else{
         cell1.textContent = data.error;
         showStatusMessage(data.error, 'false');

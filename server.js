@@ -18,6 +18,7 @@ app.use(
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/node_modules', express.static('node_modules'));
 app.use(express.static('public'));
 
 // Home Route - Show Posts

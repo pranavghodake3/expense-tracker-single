@@ -3,68 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Expense</title>
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-rupee" viewBox="0 0 16 16">
+        <path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4z"/>
+      </svg>
 </head>
 <body>
     <div class="container">
-        <p id="form-status" class="hide"></p>
-        <form action="/expenses" id="add-expense-form" class="hide" method="POST">
-            <div id="fieldsContainer">
-                <div class="single-expense-form">
-                    <input type="date" name="date[]" class="date-field" required>
-                    <input type="number" name="amount[]" class="amount-field" placeholder="Amount" required>
-                    <select name="category[]" class="category-field" required></select>
-                    <input type="text" name="description[]" class="description-field" placeholder="Description">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse1">Add Expense</a>
+                    </h4>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse">
+                    <form id="add-expense-form">
+                        <div id="fieldsContainer">
+                            <div class="single-expense-form">
+                                <div class="form-group">
+                                    <input type="date" name="date[]" class=" form-control date-field" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" name="amount[]" class="form-control amount-field" placeholder="Amount" required>
+                                </div>
+                                <div class="form-group">
+                                    <select name="category[]" class="form-control category-field" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="description[]" class="form-control description-field" placeholder="Description">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
+                        <button type="button" class="btn btn-default" onclick="onCancelClick(this);">Cancel</button>
+                        <button type="button" class="btn btn-info" id="addField">Add more</button>
+                    </form>
+                </div>
+
+                <div class="panel-heading stats-title">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#stats-body">Stats</a>
+                    </h4>
+                </div>
+                <div id="stats-body" class="panel-collapse collapse">
+                    <!-- <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="70"
+                        aria-valuemin="0" aria-valuemax="100" style="width:70%">Petrol 70%</div>
+                        <span class="badge">500</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="70"
+                        aria-valuemin="0" aria-valuemax="100" style="width:30%">Hotel 30%</div>
+                    </div> -->
+                    <ul class="list-group" id="stats-list">
+                        <!-- <li class="list-group-item list-group-item-success">Petrol <span class="badge">500</span></li>
+                        <li class="list-group-item list-group-item-info">Hotel <span class="badge">300</span></li>
+                        <li class="list-group-item list-group-item-warning">Grocery <span class="badge">100</span></li> -->
+                    </ul>
+                </div>
+
+                <div class="expense-info">
+                    <b id="currentYear"></b>
+                    <select name="month" id="month" onchange="onMonthChange(this)"></select>
+                    : <b id="totalSum"></b>
                 </div>
             </div>
-            <button type="button" id="addField">Add More</button>
-            <button type="submit" id="submit-btn">Submit</button>
-            <button type="button" onclick="onCancelClick(this);">Cancel</button>
-        </form>
-        <div class="expense-info">
-            <button type="button" id="add-expense-btn" onclick="onAddExpenseClick(this);">Add Expense</button>
-            <b id="currentYear"></b>
-            <select name="month" id="month" onchange="onMonthChange(this)"></select>
-            : <b id="sum"></b>
-            <button type="button" id="show-stats-btn" onclick="showStatus(this);">Show Stats</button>
-            <button type="button" id="hide-stats-btn" class="hide" onclick="hideStatus(this);">Hide Stats</button>
         </div>
-        <div id="stats" class="hide">
-            <table id="stats-table">
-                <thead>
-                    <th>Category</th>
-                    <th>Total</th>
-                </thead>
-                <tbody id="stats-table-body">
-                    <tr>
-                        <td>Hotels</td>
-                        <td>5,000</td>
-                    </tr>
-                    <tr>
-                        <td>Petrol</td>
-                        <td>4,500</td>
-                    </tr>
-                    <tr>
-                        <td>Hotels</td>
-                        <td>4,720</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <table>
+
+        <table class="table table-bordered table-condensed table-responsive">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Title</th>
                     <th>Category</th>
                     <th>Amount</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="expenses"></tbody>
         </table>
     </div>
+
     <script src="./script.js"></script>
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
