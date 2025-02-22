@@ -32,7 +32,8 @@ const getExpenses = async(month = null) => {
   expenses = expenses.filter(e => e);
   expenses.sort((a, b) => {
     const parseDate = (str) => {
-      let [, day, month, year] = str.match(/(\d{2})-(\d{2})-(\d{2})/);
+      str = String(str.trim());
+      let [, day, month, year] = str.trim().match(/(\d{2})-(\d{2})-(\d{2})/);
       return new Date(`20${year}-${month}-${day}`);
     };
     return parseDate(b.date) - parseDate(a.date);
@@ -72,21 +73,23 @@ const addExpense = async(body) => {
   
   for (let i = 0; i < body.length; i++) {
     const { category, amount, date, description } = body[i];
-    const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
-    let SHEET_NAME = `${currentMonth} ${currentYear}`;
-    if (!existingWorkSheets.includes(SHEET_NAME)) {
-      await createWorkSheet(SHEET_NAME);
+    if(amount){
+      const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
+      let SHEET_NAME = `${currentMonth} ${currentYear}`;
+      if (!existingWorkSheets.includes(SHEET_NAME)) {
+        await createWorkSheet(SHEET_NAME);
+      }
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A:D`,
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
+        requestBody: {
+          values: [[formatDate(date), description, category, parseFloat(amount)]],
+        },
+      });
+      data.push(response)
     }
-    const response = await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:D`,
-      valueInputOption: "RAW",
-      insertDataOption: "INSERT_ROWS",
-      requestBody: {
-        values: [[formatDate(date), description, category, parseFloat(amount)]],
-      },
-    });
-    data.push(response)
   }
 
     return data;
