@@ -215,7 +215,9 @@ async function loadExpenses(month){
                     cell_l.innerHTML = `
                         <div class="title">${finalExpenses[key][i].description}</div>
                         <div class="category">${finalExpenses[key][i].category}</div>
+                        <input type="hidden" name="expense-field" class="expense-field" value='${JSON.stringify(finalExpenses[key][i])}'>
                     `;
+                    cell_l.addEventListener("click", editExpense);
                     cell_2.innerHTML = `<div class="amount">&#8377; ${parseFloat(finalExpenses[key][i].amount).toLocaleString()}</div>`;
                     cell_3.innerHTML = `
                         <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i].id}">
@@ -301,42 +303,34 @@ function formatDate(dateString, standard = true) {
 
     return formattedDate;
 }
-function editExpense(button) {
-    let tr = button.closest('tr');
-    tr.querySelector('.edit-btn').classList.add('hide');
-    tr.querySelector('.update-btn').classList.remove('hide');
-    tr.querySelector('.cancel-btn').classList.remove('hide');
-    tr.querySelectorAll(".content").forEach(contentDiv => {
-        contentDiv.style.display = 'none';
-    });
-    tr.querySelectorAll(".content-html").forEach(contentHtmlDiv => {
-        contentHtmlDiv.style.display = 'block';
-    });
-    const date = tr.querySelector('.date-content').innerHTML;
-    const description = tr.querySelector('.description-content').innerHTML;
-    const category = tr.querySelector('.category-content').innerHTML;
-    const amount = tr.querySelector('.amount-content').innerHTML;
-    tr.querySelector('.date-field').value = new Date(formatDate(date)).toISOString().split('T')[0];
-    tr.querySelector('.description-field').value = description;
-    tr.querySelector('.category-field').value = category;
-    tr.querySelector('.amount-field').value = amount;
+function editExpense(td) {
+    let expenseData = this.querySelector('.expense-field').value;
+    expenseData = JSON.parse(expenseData);
+    const form = document.getElementById("update-expense-form");
+    form.querySelector('.date-field').value = new Date(formatDate(expenseData.date)).toISOString().split('T')[0];
+    form.querySelector('.expense-id-field').value = expenseData.id;
+    form.querySelector('.description-field').value = expenseData.description;
+    form.querySelector('.category-field').value = expenseData.category;
+    form.querySelector('.amount-field').value = expenseData.amount;
+    form.classList.remove("hide");
 }
-async function updateExpense(button) {
-    let tr = button.closest('tr');
-    const id = tr.querySelector('.id-field').value;
-    const date = tr.querySelector('.date-field').value;
-    const description = tr.querySelector('.description-field').value;
-    const category = tr.querySelector('.category-field').value;
-    const amount = tr.querySelector('.amount-field').value;
-    tr.querySelector('.edit-btn').classList.remove('hide');
-    tr.querySelector('.update-btn').classList.add('hide');
-    tr.querySelector('.cancel-btn').classList.add('hide');
-    tr.querySelectorAll(".content").forEach(contentDiv => {
-        contentDiv.style.display = 'block';
-    });
-    tr.querySelectorAll(".content-html").forEach(contentHtmlDiv => {
-        contentHtmlDiv.style.display = 'none';
-    });
+function cancelUpdateExpense(){
+    document.querySelector(".expenses-table").classList.remove("hide");
+    document.querySelector(".update-expense-form").classList.add("hide");
+    document.getElementById("update-expense-form").reset();
+}
+document.getElementById("update-expense-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const submitButton = document.getElementById("update-btn");
+    submitButton.disabled = true;
+    submitButton.textContent = "Updating...";
+    const form = document.getElementById("update-expense-form");
+    const id = form.querySelector('.expense-id-field').value;
+    const date = form.querySelector('.date-field').value;
+    const description = form.querySelector('.description-field').value;
+    const category = form.querySelector('.category-field').value;
+    const amount = form.querySelector('.amount-field').value;
+
     let formSubmitData = await fetch("/expenses/"+id, {
         method: "PUT",
         headers: {
@@ -346,10 +340,33 @@ async function updateExpense(button) {
     });
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
-        tr.querySelector('.date-content').innerHTML = formatDate(date, false);
-        tr.querySelector('.description-content').innerHTML = description;
-        tr.querySelector('.category-content').innerHTML = category;
-        tr.querySelector('.amount-content').innerHTML = amount;
+        form.classList.add("hide");
+        await loadExpenses(currentMonth);
+        await showStatusMessage('Updated successfuly!', 'true');
+    }else{
+        await showStatusMessage(formSubmitData.error, 'false');
+    }
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit";
+});
+async function updateExpense(button) {
+    const form = document.getElementById("update-expense-form");
+    const id = form.querySelector('.expense-id-field').value;
+    const date = form.querySelector('.date-field').value;
+    const description = form.querySelector('.description-field').value;
+    const category = form.querySelector('.category-field').value;
+    const amount = form.querySelector('.amount-field').value;
+    let formSubmitData = await fetch("/expenses/"+id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({date, description, category, amount, currentMonth}),
+    });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        form.classList.add("hide");
+        await loadExpenses(currentMonth);
         await showStatusMessage('Updated successfuly!', 'true');
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
@@ -404,13 +421,15 @@ async function loadCategories(){
     let data = await fetch('/categories');
     data = await data.json();
     categories = data.data.categories;
-    const select = document.getElementsByClassName("category-field")[0];
-    data.data.categories.forEach(category => {
-        let option = document.createElement("option");
-        option.value = category;
-        option.text = category;
-        if(category === 'Other')    option.selected = true;
-        select.appendChild(option);
+    // const select = document.getElementsByClassName("category-field")[0];
+    document.querySelectorAll(".category-field").forEach(select => {
+        data.data.categories.forEach(category => {
+            let option = document.createElement("option");
+            option.value = category;
+            option.text = category;
+            if(category === 'Other')    option.selected = true;
+            select.appendChild(option);
+        });
     });
 }
 

@@ -111,16 +111,26 @@ const createWorkSheet = async(workSheetName) => {
 
 const updateExpense = async(id, body) => {
   const { category, amount, date, description, currentMonth } = body;
-  // const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
-  const SHEET_NAME = `${currentMonth} ${currentYear}`;
-  const data = await sheets.spreadsheets.values.update({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A${id+1}:D${id+1}`,
-      valueInputOption: "RAW",
-      requestBody: {
-          values: [[formatDate(date), description, category, parseFloat(amount)]],
-      },
-  });
+  if(currentYear != new Date(date).getFullYear().toString().slice(-2)){
+    throw Error(`Year should be current running only: ${date}`)
+  }
+  const newMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
+  let data = [];
+  if(currentMonth == newMonth){
+    const SHEET_NAME = `${currentMonth} ${currentYear}`;
+    data = await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A${id+1}:D${id+1}`,
+        valueInputOption: "RAW",
+        requestBody: {
+            values: [[formatDate(date), description, category, parseFloat(amount)]],
+        },
+    });
+  }else{
+    data = await addExpense([{category, amount, date, description}]);
+    await deleteExpense(id, newMonth);
+  }
+  
 
   return data;
 };
