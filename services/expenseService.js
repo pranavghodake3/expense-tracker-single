@@ -128,7 +128,7 @@ const updateExpense = async(id, body) => {
     });
   }else{
     data = await addExpense([{category, amount, date, description}]);
-    await deleteExpense(id, newMonth);
+    await deleteExpense(id, currentMonth);
   }
   
 

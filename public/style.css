@@ -85,4 +85,20 @@ tr.date-row {
     text-align: right;
     width: 50%;
 }
+.form-group {
+    margin-bottom: 5px;
+}
+form{
+    margin-bottom: 3px;
+}
+.panel-heading.stats-title{
+    background: #ccf1cc;
+}
+.panel-heading.add-expense-title{
+    background: #c1c1dd;
+}
+.row.expense-info{
+    font-size: 17px;
+    background-color: pink;
+}
   

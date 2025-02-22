@@ -316,7 +316,7 @@ function editExpense(td) {
 }
 function cancelUpdateExpense(){
     document.querySelector(".expenses-table").classList.remove("hide");
-    document.querySelector(".update-expense-form").classList.add("hide");
+    document.getElementById("update-expense-form").classList.add("hide");
     document.getElementById("update-expense-form").reset();
 }
 document.getElementById("update-expense-form").addEventListener("submit", async function(event) {
@@ -347,31 +347,31 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
         await showStatusMessage(formSubmitData.error, 'false');
     }
     submitButton.disabled = false;
-    submitButton.textContent = "Submit";
+    submitButton.textContent = "Update";
 });
-async function updateExpense(button) {
-    const form = document.getElementById("update-expense-form");
-    const id = form.querySelector('.expense-id-field').value;
-    const date = form.querySelector('.date-field').value;
-    const description = form.querySelector('.description-field').value;
-    const category = form.querySelector('.category-field').value;
-    const amount = form.querySelector('.amount-field').value;
-    let formSubmitData = await fetch("/expenses/"+id, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({date, description, category, amount, currentMonth}),
-    });
-    formSubmitData = await formSubmitData.json();
-    if(formSubmitData.status){
-        form.classList.add("hide");
-        await loadExpenses(currentMonth);
-        await showStatusMessage('Updated successfuly!', 'true');
-    }else{
-        await showStatusMessage(formSubmitData.error, 'false');
-    }
-}
+// async function updateExpense(button) {
+//     const form = document.getElementById("update-expense-form");
+//     const id = form.querySelector('.expense-id-field').value;
+//     const date = form.querySelector('.date-field').value;
+//     const description = form.querySelector('.description-field').value;
+//     const category = form.querySelector('.category-field').value;
+//     const amount = form.querySelector('.amount-field').value;
+//     let formSubmitData = await fetch("/expenses/"+id, {
+//         method: "PUT",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify({date, description, category, amount, currentMonth}),
+//     });
+//     formSubmitData = await formSubmitData.json();
+//     if(formSubmitData.status){
+//         form.classList.add("hide");
+//         await loadExpenses(currentMonth);
+//         await showStatusMessage('Updated successfuly!', 'true');
+//     }else{
+//         await showStatusMessage(formSubmitData.error, 'false');
+//     }
+// }
 function cancelEditExpense(button) {
     let tr = button.closest('tr');
     tr.querySelector('.edit-btn').classList.remove('hide');
@@ -414,6 +414,7 @@ async function deleteExpense(button) {
 
 async function onMonthChange(event){
     currentMonth = event.value;
+    cancelUpdateExpense();
     await loadExpenses(event.value);
     loadStats(event.value);
 }
