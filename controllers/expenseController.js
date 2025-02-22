@@ -49,7 +49,8 @@ const updateExpense = async (req, res) => {
 const deleteExpense = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const response = await expenseService.deleteExpense(id);
+        const month = req.params.month;
+        const response = await expenseService.deleteExpense(id, month);
         req.session.formData = { success: true, message: "Expense deleted successfully!" };
         return successResponse(res, response);
     } catch (error) {

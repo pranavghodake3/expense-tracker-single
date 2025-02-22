@@ -17,14 +17,23 @@ document.getElementById("addField").addEventListener("click", function() {
     const container = document.getElementById("fieldsContainer");
     const newGroup = document.createElement("div");
     newGroup.classList.add("single-expense-form");
+    newGroup.classList.add("single-expense-form-extra");
     newGroup.innerHTML = `
-        <input type="date" name="date[]" class="date-field" required>
-        <input type="number" name="amount[]" class="amount-field" placeholder="Amount" required>
-        <select name="category[]" class="category-field" required>
-            ${categories.map(e => `<option value="${e}" ${e === 'Other' ? 'selected' : ''}>${e}</option>`).join('')}
-        </select>
-        <input type="text" name="description[]" class="description-field" placeholder="Description">
-        <button type="button" class="remove-btn"></button>
+        <div class="form-group">
+            <input type="date" name="date[]" class=" form-control date-field" required>
+        </div>
+        <div class="form-group">
+            <input type="number" name="amount[]" class="form-control amount-field" placeholder="Amount" required>
+        </div>
+        <div class="form-group">
+            <select name="category[]" class="form-control category-field" required>
+                 ${categories.map(e => `<option value="${e}" ${e === 'Other' ? 'selected' : ''}>${e}</option>`).join('')}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="text" name="description[]" class="form-control description-field" placeholder="Description">
+        </div>
+        <button type="button" class="remove-btn">Remove</button>
     `;
     container.appendChild(newGroup);
     document.querySelectorAll(".date-field").forEach(input => {
@@ -66,16 +75,18 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     });
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
-        showStatusMessage("Added Successfully!", 'true');
+        await showStatusMessage("Added Successfully!", 'true');
     }else{
-        showStatusMessage(formSubmitData.error, 'false');
+        await showStatusMessage(formSubmitData.error, 'false');
     }
     submitButton.disabled = false;
     submitButton.textContent = "Submit";
 });
 function onCancelClick(event){
-    document.getElementById('add-expense-form').classList.add('hide');
-    document.getElementById('add-expense-btn').classList.remove('hide');
+    document.querySelectorAll(".single-expense-form-extra").forEach(e => e.remove());
+    document.getElementById("add-expense-collaps-btn").click();
+    // document.getElementById('add-expense-form').classList.add('hide');
+    // document.getElementById('add-expense-btn').classList.remove('hide');
     // document.getElementById('add-expense-form').style.display = 'none';
 }
 function onAddExpenseClick(event){
@@ -89,8 +100,7 @@ function showStatus(button){
     document.getElementById('stats').classList.remove("hide");
 }
 function loadStats(changedMonth){
-    console.log("loadStats allExpenses: ",allExpenses)
-    const stats = {};
+    let stats = {};
     let totalSum = 0;
 
     for(let key in allExpenses[changedMonth]){
@@ -100,19 +110,22 @@ function loadStats(changedMonth){
             totalSum += parseFloat(allExpenses[changedMonth][key][i].amount);
         }
     }
+    stats = Object.fromEntries(
+        Object.entries(stats).sort(([, v1], [, v2]) => v2 - v1)
+      );
     // allExpenses[changedMonth].forEach(e => {
     //     if(typeof stats[e.category] == 'undefined') stats[e.category] = 0;
     //     stats[e.category] += parseFloat(e.amount);
     // });
-    // const statsTableBody = document.getElementById("stats-table-body");
-    // statsTableBody.innerHTML = '';
-    // for (const key in stats) {
-    //     let row = statsTableBody.insertRow();
-    //     let cell1 = row.insertCell(0);
-    //     let cell2 = row.insertCell(1);
-    //     cell1.innerHTML = key;
-    //     cell2.innerHTML = stats[key].toLocaleString();
-    // }
+    const statsTableBody = document.getElementById("stats-table-body");
+    statsTableBody.innerHTML = '';
+    for (const key in stats) {
+        let row = statsTableBody.insertRow();
+        let cell1 = row.insertCell(0);
+        let cell2 = row.insertCell(1);
+        cell1.innerHTML = key;
+        cell2.innerHTML = `&#8377; ${stats[key].toLocaleString()}`;
+    }
     // for (const key in stats) {
     //     const container = document.getElementById("stats-body");
     //     const newGroup = document.createElement("div");
@@ -125,17 +138,17 @@ function loadStats(changedMonth){
     //     `;
     //     container.appendChild(newGroup);
     // }
-    const statsList = document.getElementById("stats-list");
-    for (const key in stats) {
+    // const statsList = document.getElementById("stats-list");
+    // for (const key in stats) {
         
-        const li = document.createElement("li");
-        li.classList.add("list-group-item");
-        let categoryPercentage = Math.round((parseFloat(stats[key])/totalSum)*100);
-        li.innerHTML = `
-            ${key} <span class="badge">${parseFloat(stats[key])}</span>
-        `;
-        statsList.appendChild(li);
-    }
+    //     const li = document.createElement("li");
+    //     li.classList.add("list-group-item");
+    //     let categoryPercentage = Math.round((parseFloat(stats[key])/totalSum)*100);
+    //     li.innerHTML = `
+    //         ${key} <span class="badge">&#8377;${parseFloat(stats[key]).toLocaleString()}</span>
+    //     `;
+    //     statsList.appendChild(li);
+    // }
 }
 function hideStatus(button){
     button.classList.add("hide");
@@ -145,8 +158,8 @@ function hideStatus(button){
 document.querySelectorAll(".date-field").forEach(input => {
     input.value = new Date().toISOString().split('T')[0];
 });
-function showStatusMessage(formStatusMessage, formStatus){
-    const formStatusElement = document.getElementById('form-status');
+async function showStatusMessage(formStatusMessage, formStatus){
+    const formStatusElement = document.getElementsByClassName(formStatus == 'true' ? 'alert-success' : 'alert-danger')[0];
     formStatusElement.classList.remove('hide');
     if(formStatusMessage){
         formStatusElement.innerHTML = formStatusMessage;
@@ -156,6 +169,13 @@ function showStatusMessage(formStatusMessage, formStatus){
             formStatusElement.classList.add('hide');
         }, formStatus === "true" ? 1000 : 2000);
     }
+    if(formStatus == 'true')    await clearFormFields();
+}
+async function clearFormFields(){
+    document.querySelectorAll(".single-expense-form-extra").forEach(e => e.remove());
+    document.getElementById("add-expense-form").reset();
+    // document.getElementById("add-expense-collaps-btn").click();
+    await loadExpenses(currentMonth);
 }
 
 async function loadExpenses(month){
@@ -182,18 +202,27 @@ async function loadExpenses(month){
                 row.classList.add('active');
                 let cell_l = row.insertCell(0);
                 let cell_2 = row.insertCell(1);
+                let cell_3 = row.insertCell(2);
                 cell_l.innerHTML = key;
-                cell_2.innerHTML = `<i class="bi bi-currency-rupee"></i> ${sum.toLocaleString()}`;
+                cell_2.innerHTML = `&#8377; ${sum.toLocaleString()}`;
+                cell_3.innerHTML = '';
                 for(let i = 0; i < finalExpenses[key].length; i++){
                     row = expensesTbody.insertRow();
                     row.classList.add('expense-row');
                     cell_l = row.insertCell(0);
                     cell_2 = row.insertCell(1);
+                    cell_3 = row.insertCell(2);
                     cell_l.innerHTML = `
                         <div class="title">${finalExpenses[key][i].description}</div>
                         <div class="category">${finalExpenses[key][i].category}</div>
                     `;
-                    cell_2.innerHTML = `<div class="amount"><i class="bi bi-currency-rupee"></i>${finalExpenses[key][i].amount.toLocaleString()}</div>`;
+                    cell_2.innerHTML = `<div class="amount">&#8377; ${parseFloat(finalExpenses[key][i].amount).toLocaleString()}</div>`;
+                    cell_3.innerHTML = `
+                        <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i].id}">
+                        <button type="button" class="btn btn-default btn-sm" onclick="deleteExpense(this)">
+                            <span class="glyphicon glyphicon-trash"></span> 
+                        </button>
+                    `;
                 }
                 totalSum += sum
             }
@@ -248,10 +277,10 @@ async function loadExpenses(month){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
-        document.getElementById("totalSum").innerHTML = totalSum.toLocaleString()+" Rs.";
+        document.getElementById("totalSum").innerHTML = "&#8377;"+totalSum.toLocaleString();
     }else{
         cell1.textContent = data.error;
-        showStatusMessage(data.error, 'false');
+        await showStatusMessage(data.error, 'false');
     }
 }
 function formatDate(dateString, standard = true) {
@@ -321,9 +350,9 @@ async function updateExpense(button) {
         tr.querySelector('.description-content').innerHTML = description;
         tr.querySelector('.category-content').innerHTML = category;
         tr.querySelector('.amount-content').innerHTML = amount;
-        showStatusMessage('Updated successfuly!', 'true');
+        await showStatusMessage('Updated successfuly!', 'true');
     }else{
-        showStatusMessage(formSubmitData.error, 'false');
+        await showStatusMessage(formSubmitData.error, 'false');
     }
 }
 function cancelEditExpense(button) {
@@ -343,7 +372,7 @@ async function deleteExpense(button) {
     button.disabled = true;
     button.textContent = "Deleting...";
     const id = tr.querySelector('.id-field').value;
-    let formSubmitData = await fetch("/expenses/"+id, {
+    let formSubmitData = await fetch(`/expenses/${id}/${currentMonth}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"
@@ -357,9 +386,10 @@ async function deleteExpense(button) {
             }
         });
         tr.remove();
-        showStatusMessage('Deleted successfuly!', 'true');
+        await showStatusMessage('Deleted successfuly!', 'true');
+        await loadExpenses(currentMonth);
     }else{
-        showStatusMessage(formSubmitData.error, 'false');
+        await showStatusMessage(formSubmitData.error, 'false');
     }
     button.disabled = false;
     button.textContent = "Delete";

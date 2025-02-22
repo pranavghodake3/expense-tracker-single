@@ -1,7 +1,10 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    /* background-color: #f4f4f4; */
     text-align: center;
+}
+.container{
+    padding-top: 5px;
 }
 
 h1 {
@@ -14,18 +17,18 @@ table{
     border: 1px solid #ddd;
 }
 tr.date-row {
-    /* font-size: 11px; */
+    font-size: 13px;
     font-weight: bold;
     color: green;
     /* border: 2px solid #ddc0c0; */
     /* background: #f1f0f0; */
 }
 .title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: bold;
 }
 .category {
-    font-size: 12px;
+    font-size: 13px;
     color: brown;
 }
 .amount {
@@ -35,6 +38,46 @@ tr.date-row {
 .expense-row td {
     padding: 1px 0px 1px 6px !important;
 }
-.panel-heading.stats-title{
+/* .panel-heading.stats-title{
     margin-top: 8px;
+} */
+.panel-group.expense-stats {
+    margin-bottom: 7px;
+}
+.panel-heading {
+    padding: 5px 0px;
+}
+.row.expense-info{
+    margin: 0 1px 7px;
+    background: antiquewhite;
+    padding: 5px;
+}
+.single-expense-form{
+    border: 1px solid #d4d1d1;
+    padding: 6px;
+    margin-bottom: 6px;
+}
+.single-expense-form .form-group {
+    margin-bottom: 3px;
+}
+.remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* .remove-btn::before {
+    content: '\2716';
+} */
+.alert {
+    padding: 5px;
+    margin-bottom: 5px;
+}
+.alert.hide{
+    display: none;
 }

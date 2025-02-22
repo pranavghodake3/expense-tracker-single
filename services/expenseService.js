@@ -128,7 +128,7 @@ const addExpense = async(body) => {
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
-        values: [[formatDate(date), description ?? category, category, parseFloat(amount)]],
+        values: [[formatDate(date), description, category, parseFloat(amount)]],
       },
     });
     data.push(response)
@@ -172,10 +172,9 @@ async function getSheetId(sheetName) {
   return sheet ? sheet.properties.sheetId : null;
 }
 
-async function deleteExpense(id) {
+async function deleteExpense(id, month) {
   // const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
-  const currentMonth = 'Mar'
-  const SHEET_NAME = `${currentMonth} ${currentYear}`;
+  const SHEET_NAME = `${month} ${currentYear}`;
   // const authClient = await auth.getClient();
 
   const request = {
