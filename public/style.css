@@ -81,3 +81,8 @@ tr.date-row {
 .alert.hide{
     display: none;
 }
+#stats-table-body tr td:first-child {
+    text-align: right;
+    width: 50%;
+}
+  

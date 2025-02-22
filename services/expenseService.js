@@ -11,60 +11,6 @@ const sheets = google.sheets({ version: "v4", auth: client });
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const currentYear = new Date().getFullYear().toString().slice(-2);
 
-const express = require('express');
-const router = express.Router();
-
-// Route for the home page
-router.get('/', (req, res) => {
-    let expenses = [
-        {
-          date: '2025-02-16',
-          category: 'Cat2',
-          amount: 70,
-          title: 'Amrakhand'
-        },
-        {
-          date: '2025-02-18',
-          category: 'Others',
-          amount: 10,
-          title: 'Bike air'
-        },
-        {
-          date: '2025-02-16',
-          category: 'Others',
-          amount: 180,
-          title: 'Hair'
-        },
-        {
-          date: '2025-02-17',
-          category: 'Others',
-          amount: 10,
-          title: 'Bike air'
-        },
-        {
-          date: '2025-02-16',
-          category: 'Cat1',
-          amount: 60,
-          title: 'Eggs'
-        },
-    ];
-    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-    console.log(expenses);
-    const finalArr = {};
-    expenses.forEach(element => {
-    if (typeof finalArr[element.date] == 'undefined') finalArr[element.date] = [];
-    
-    finalArr[element.date].push(element);
-    });
-    console.log("finalArr: ",finalArr)
-    expenses = finalArr;
-      
-    res.json(expenses);
-});
-
-module.exports = router;
-
-
 const getExpenses = async(month = null) => {
   const currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
   let SHEET_NAME = `${currentMonth} ${currentYear}`;
@@ -73,7 +19,6 @@ const getExpenses = async(month = null) => {
     spreadsheetId: SPREADSHEET_ID,
     range: `${SHEET_NAME}!A:D`,
   });
-  console.log("response: ",response.data)
   let expenses = response?.data?.values ? response?.data?.values.map((e, index) => {
     const expense = {
       id: index,
@@ -118,10 +63,20 @@ const getCategories = async () => {
 
 const addExpense = async(body) => {
   const data = [];
+  const existingWorkSheets = (await getAllWorkSheets()).map(sheet => sheet.properties.title);
+  const notCurrentYears = [];
+  body.forEach(e => {
+    if(currentYear != new Date(e.date).getFullYear().toString().slice(-2))  notCurrentYears.push(e.date)
+  });
+  if(notCurrentYears.length > 0)  throw Error(`Years should be current running: ${notCurrentYears.join(", ")}`)
+  
   for (let i = 0; i < body.length; i++) {
     const { category, amount, date, description } = body[i];
     const currentMonth = new Date(date).toLocaleString('en-US', { month: 'short' });
-    const SHEET_NAME = `${currentMonth} ${currentYear}`;
+    let SHEET_NAME = `${currentMonth} ${currentYear}`;
+    if (!existingWorkSheets.includes(SHEET_NAME)) {
+      await createWorkSheet(SHEET_NAME);
+    }
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A:D`,
@@ -133,18 +88,26 @@ const addExpense = async(body) => {
     });
     data.push(response)
   }
-    
-    // const data = await sheets.spreadsheets.values.update({
-    //     spreadsheetId: SPREADSHEET_ID,
-    //     range: `${SHEET_NAME}!A2:D2`, // Change to the correct row dynamically if needed
-    //     valueInputOption: "RAW",
-    //     requestBody: {
-    //         values: [[formatDate(date), category, category, parseFloat(amount)]],
-    //     },
-    // });
 
     return data;
 };
+const createWorkSheet = async(workSheetName) => {
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SPREADSHEET_ID,
+    requestBody: {
+      requests: [
+        {
+          addSheet: {
+            properties: {
+              title: workSheetName,
+              gridProperties: { rowCount: 50, columnCount: 10 },
+            },
+          },
+        },
+      ],
+    },
+  });
+}
 
 const updateExpense = async(id, body) => {
   const { category, amount, date, description, currentMonth } = body;
@@ -163,13 +126,18 @@ const updateExpense = async(id, body) => {
 };
 
 async function getSheetId(sheetName) {
+  const workSheets = await getAllWorkSheets();
+
+  const sheet = workSheets.find(s => s.properties.title === sheetName);
+  return sheet ? sheet.properties.sheetId : null;
+}
+
+async function getAllWorkSheets(){
   const sheetMetadata = await sheets.spreadsheets.get({
       spreadsheetId: SPREADSHEET_ID,
-      // auth: authClient,
   });
 
-  const sheet = sheetMetadata.data.sheets.find(s => s.properties.title === sheetName);
-  return sheet ? sheet.properties.sheetId : null;
+  return sheetMetadata.data.sheets;
 }
 
 async function deleteExpense(id, month) {

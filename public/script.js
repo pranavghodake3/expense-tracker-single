@@ -123,7 +123,7 @@ function loadStats(changedMonth){
         let row = statsTableBody.insertRow();
         let cell1 = row.insertCell(0);
         let cell2 = row.insertCell(1);
-        cell1.innerHTML = key;
+        cell1.innerHTML = key+": ";
         cell2.innerHTML = `&#8377; ${stats[key].toLocaleString()}`;
     }
     // for (const key in stats) {
@@ -167,7 +167,7 @@ async function showStatusMessage(formStatusMessage, formStatus){
         formStatusElement.classList.add(formStatus);
         setTimeout(() => {
             formStatusElement.classList.add('hide');
-        }, formStatus === "true" ? 1000 : 2000);
+        }, formStatus === "true" ? 1000 : 3000);
     }
     if(formStatus == 'true')    await clearFormFields();
 }
@@ -277,7 +277,7 @@ async function loadExpenses(month){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
-        document.getElementById("totalSum").innerHTML = "&#8377;"+totalSum.toLocaleString();
+        document.getElementById("totalSum").innerHTML = "&#8377; "+totalSum.toLocaleString();
     }else{
         cell1.textContent = data.error;
         await showStatusMessage(data.error, 'false');
