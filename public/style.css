@@ -101,4 +101,7 @@ form{
     font-size: 17px;
     background-color: pink;
 }
+#expenses tr td:first-child {
+    cursor: pointer;
+}
   

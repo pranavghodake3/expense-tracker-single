@@ -52,10 +52,11 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     submitButton.disabled = true;
     submitButton.textContent = "Submitting...";
     const formDataArray = [];
-    const dateFields = document.querySelectorAll(".date-field");
-    const amountFields = document.querySelectorAll(".amount-field");
-    const categoryFields = document.querySelectorAll(".category-field");
-    const descriptionFields = document.querySelectorAll(".description-field");
+    const form = document.getElementById("add-expense-form");
+    const dateFields = form.querySelectorAll(".date-field");
+    const amountFields = form.querySelectorAll(".amount-field");
+    const categoryFields = form.querySelectorAll(".category-field");
+    const descriptionFields = form.querySelectorAll(".description-field");
 
     // Collect data from each form field group
     dateFields.forEach((dateField, index) => {
@@ -76,6 +77,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         await showStatusMessage("Added Successfully!", 'true');
+        document.getElementById("add-expense-collaps-btn").click();
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -105,13 +107,14 @@ function loadStats(changedMonth){
 
     for(let key in allExpenses[changedMonth]){
         for(let i = 0; i < allExpenses[changedMonth][key].length; i++){
-            if(typeof stats[allExpenses[changedMonth][key][i].category] == 'undefined') stats[allExpenses[changedMonth][key][i].category] = 0;
-            stats[allExpenses[changedMonth][key][i].category] += parseFloat(allExpenses[changedMonth][key][i].amount);
+            if(typeof stats[allExpenses[changedMonth][key][i].category] == 'undefined') stats[allExpenses[changedMonth][key][i].category] = {total:0, count:0};
+            stats[allExpenses[changedMonth][key][i].category].total += parseFloat(allExpenses[changedMonth][key][i].amount);
+            stats[allExpenses[changedMonth][key][i].category].count++;
             totalSum += parseFloat(allExpenses[changedMonth][key][i].amount);
         }
     }
     stats = Object.fromEntries(
-        Object.entries(stats).sort(([, v1], [, v2]) => v2 - v1)
+        Object.entries(stats).sort(([, v1], [, v2]) => v2.total - v1.total)
       );
     // allExpenses[changedMonth].forEach(e => {
     //     if(typeof stats[e.category] == 'undefined') stats[e.category] = 0;
@@ -124,7 +127,7 @@ function loadStats(changedMonth){
         let cell1 = row.insertCell(0);
         let cell2 = row.insertCell(1);
         cell1.innerHTML = key+": ";
-        cell2.innerHTML = `&#8377; ${stats[key].toLocaleString()}`;
+        cell2.innerHTML = `&#8377; ${stats[key].total.toLocaleString()} (${stats[key].count})`;
     }
     // for (const key in stats) {
     //     const container = document.getElementById("stats-body");
@@ -191,6 +194,7 @@ async function loadExpenses(month){
     if(data.status){
         expensesTbody.innerHTML = '';
         let totalSum = 0;
+        let totalTransactions = 0;
         allExpenses[month] = data.data.expenses;
         const finalExpenses = data.data.expenses;
         if(Object.entries(finalExpenses).length > 0){
@@ -203,8 +207,9 @@ async function loadExpenses(month){
                 let cell_l = row.insertCell(0);
                 let cell_2 = row.insertCell(1);
                 let cell_3 = row.insertCell(2);
-                cell_l.innerHTML = key;
-                cell_2.innerHTML = `&#8377; ${sum.toLocaleString()}`;
+                // isDateHaveWeekdayFormat(expenseData.date) ? formatDate(expenseData.date, true) : expenseData.date;
+                cell_l.innerHTML = formatDateNew(key);
+                cell_2.innerHTML = `&#8377; ${sum.toLocaleString()} (${finalExpenses[key].length})`;
                 cell_3.innerHTML = '';
                 for(let i = 0; i < finalExpenses[key].length; i++){
                     row = expensesTbody.insertRow();
@@ -218,13 +223,14 @@ async function loadExpenses(month){
                         <input type="hidden" name="expense-field" class="expense-field" value='${JSON.stringify(finalExpenses[key][i])}'>
                     `;
                     cell_l.addEventListener("click", editExpense);
-                    cell_2.innerHTML = `<div class="amount">&#8377; ${parseFloat(finalExpenses[key][i].amount).toLocaleString()}</div>`;
+                    cell_2.innerHTML = `<div class="amount">&#8377; ${parseFloat(finalExpenses[key][i].amount).toLocaleString()} </div>`;
                     cell_3.innerHTML = `
                         <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i].id}">
                         <button type="button" class="btn btn-default btn-sm" onclick="deleteExpense(this)">
                             <span class="glyphicon glyphicon-trash"></span> 
                         </button>
                     `;
+                    totalTransactions++;
                 }
                 totalSum += sum
             }
@@ -279,11 +285,16 @@ async function loadExpenses(month){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
-        document.getElementById("totalSum").innerHTML = "&#8377; "+totalSum.toLocaleString();
+        document.getElementById("totalSum").innerHTML = `&#8377; ${totalSum.toLocaleString()} (${totalTransactions})`;
     }else{
         cell1.textContent = data.error;
         await showStatusMessage(data.error, 'false');
     }
+}
+function isDateHaveWeekdayFormat(dateString){
+    let parts = dateString.split(',');
+    // console.log(dateString," = parts.length: ",parts, ", TT: ",dateString.includes(","))
+    return parts.length > 1 ? true : false;
 }
 function formatDate(dateString, standard = true) {
     let formattedDate = '';
@@ -300,6 +311,18 @@ function formatDate(dateString, standard = true) {
         const year = String(date.getFullYear()).slice(-2);
         formattedDate = `${weekday}, ${day}-${month}-${year}`;
     }
+    console.log(dateString,", standard: ",standard, ", formattedDate: ",formattedDate)
+
+    return formattedDate;
+}
+function formatDateNew(dateString) {
+    let formattedDate = '';
+    const date = new Date(dateString);
+    const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = String(date.getFullYear()).slice(-2);
+    formattedDate = `${weekday}, ${day}-${month}-${year}`;
 
     return formattedDate;
 }
@@ -307,12 +330,13 @@ function editExpense(td) {
     let expenseData = this.querySelector('.expense-field').value;
     expenseData = JSON.parse(expenseData);
     const form = document.getElementById("update-expense-form");
-    form.querySelector('.date-field').value = new Date(formatDate(expenseData.date)).toISOString().split('T')[0];
+    form.querySelector('.date-field').value = isDateHaveWeekdayFormat(expenseData.date) ? formatDate(expenseData.date, true) : expenseData.date;
     form.querySelector('.expense-id-field').value = expenseData.id;
     form.querySelector('.description-field').value = expenseData.description;
     form.querySelector('.category-field').value = expenseData.category;
     form.querySelector('.amount-field').value = expenseData.amount;
     form.classList.remove("hide");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function cancelUpdateExpense(){
     document.querySelector(".expenses-table").classList.remove("hide");
