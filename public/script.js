@@ -409,31 +409,34 @@ function cancelEditExpense(button) {
     });
 }
 async function deleteExpense(button) {
-    let tr = button.closest('tr');
-    button.disabled = true;
-    button.textContent = "Deleting...";
-    const id = tr.querySelector('.id-field').value;
-    let formSubmitData = await fetch(`/expenses/${id}/${currentMonth}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
-    });
-    formSubmitData = await formSubmitData.json();
-    if(formSubmitData.status){
-        document.querySelectorAll(".id-field").forEach(input => {
-            if(input.value > id){
-                input.value -= 1;
-            }
+    const deleteConfirm = confirm("Are you sure to delete this Expense ?");
+    if(deleteConfirm){
+        let tr = button.closest('tr');
+        button.disabled = true;
+        button.textContent = "Deleting...";
+        const id = tr.querySelector('.id-field').value;
+        let formSubmitData = await fetch(`/expenses/${id}/${currentMonth}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
         });
-        tr.remove();
-        await showStatusMessage('Deleted successfuly!', 'true');
-        await loadExpenses(currentMonth);
-    }else{
-        await showStatusMessage(formSubmitData.error, 'false');
+        formSubmitData = await formSubmitData.json();
+        if(formSubmitData.status){
+            document.querySelectorAll(".id-field").forEach(input => {
+                if(input.value > id){
+                    input.value -= 1;
+                }
+            });
+            tr.remove();
+            await showStatusMessage('Deleted successfuly!', 'true');
+            await loadExpenses(currentMonth);
+        }else{
+            await showStatusMessage(formSubmitData.error, 'false');
+        }
+        button.disabled = false;
+        button.textContent = "Delete";
     }
-    button.disabled = false;
-    button.textContent = "Delete";
 }
 
 async function onMonthChange(event){
