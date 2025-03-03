@@ -36,9 +36,7 @@ document.getElementById("addField").addEventListener("click", function() {
         <button type="button" class="remove-btn">Remove</button>
     `;
     container.appendChild(newGroup);
-    document.querySelectorAll(".date-field").forEach(input => {
-        input.value = new Date().toISOString().split('T')[0];
-    });
+    newGroup.querySelector(".date-field").value = new Date().toISOString().split('T')[0];
 });
 document.getElementById("fieldsContainer").addEventListener("click", function (event) {
     if (event.target.classList.contains("remove-btn")) {
