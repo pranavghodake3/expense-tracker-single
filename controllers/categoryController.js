@@ -1,49 +1,48 @@
-const expenseService = require("../services/expenseService")
+const categoryService = require("../services/categoryService")
 const { successResponse, errorResponse } = require("../utils/responseHelper");
 
-const getExpenses = async (req, res) => {
+const getcategories = async (req, res) => {
     try {
-        const response = await expenseService.getExpenses();
+        const response = await categoryService.getcategories();
         return successResponse(res, response);
     } catch (error) {
         return errorResponse(res, error);
     }
 };
 
-const getExpenseById = async (req, res) => {
+const getcategory = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await expenseService.getExpenseById(id);
+        const response = await categoryService.getcategory(id);
         return successResponse(res, response);
     } catch (error) {
         return errorResponse(res, error);
     }
 };
 
-const createExpense = async (req, res) => {
+const create = async (req, res) => {
     try {
-        console.log("req.body: ",req.body)
-        const response = await expenseService.createExpense(req.body);
+        const response = await categoryService.create(req.body);
         return successResponse(res, response);
     } catch (error) {
         return errorResponse(res, error);
     }
 };
 
-const updateExpense = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const response = await expenseService.updateExpense(id, req.body);
-        return successResponse(res, response);
-    } catch (error) {
-        return errorResponse(res, error);
-    }
-};
-
-const deleteExpenseById = async (req, res) => {
+const updatecategory = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await expenseService.deleteExpenseById(id);
+        const response = await categoryService.updatecategory(id, req.body);
+        return successResponse(res, response);
+    } catch (error) {
+        return errorResponse(res, error);
+    }
+};
+
+const deletecategory = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await categoryService.deletecategory(id);
         return successResponse(res, response);
     } catch (error) {
         return errorResponse(res, error);
@@ -51,9 +50,9 @@ const deleteExpenseById = async (req, res) => {
 };
 
 module.exports = {
-    getExpenses,
-    getExpenseById,
-    createExpense,
-    updateExpense,
-    deleteExpenseById,
+    getcategories,
+    getcategory,
+    create,
+    updatecategory,
+    deletecategory,
 };

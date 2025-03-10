@@ -1,6 +1,7 @@
 
 const allExpenses = {};
 let categories = [];
+const arrangedCategoriesById = {};
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const select = document.getElementById("month");
 months.forEach((month, index) => {
@@ -27,11 +28,11 @@ document.getElementById("addField").addEventListener("click", function() {
         </div>
         <div class="form-group">
             <select name="category[]" class="form-control category-field" required>
-                 ${categories.map(e => `<option value="${e}" ${e === 'Other' ? 'selected' : ''}>${e}</option>`).join('')}
+                 ${categories.map(e => `<option value="${e._id}" ${e.name === 'Other' ? 'selected' : ''}>${e.name}</option>`).join('')}
             </select>
         </div>
         <div class="form-group">
-            <input type="text" name="description[]" class="form-control description-field" placeholder="Description">
+            <input type="text" name="title[]" class="form-control title-field" placeholder="Description">
         </div>
         <button type="button" class="remove-btn">Remove</button>
     `;
@@ -54,7 +55,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     const dateFields = form.querySelectorAll(".date-field");
     const amountFields = form.querySelectorAll(".amount-field");
     const categoryFields = form.querySelectorAll(".category-field");
-    const descriptionFields = form.querySelectorAll(".description-field");
+    const titleFields = form.querySelectorAll(".title-field");
 
     // Collect data from each form field group
     dateFields.forEach((dateField, index) => {
@@ -62,7 +63,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
             date: dateFields[index].value,
             amount: amountFields[index].value,
             category: categoryFields[index].value,
-            description: descriptionFields[index].value
+            title: titleFields[index].value
         });
     });
     let formSubmitData = await fetch("/expenses", {
@@ -102,12 +103,14 @@ function showStatus(button){
 function loadStats(changedMonth){
     let stats = {};
     let totalSum = 0;
+    console.log("allExpenses: ",allExpenses)
 
     for(let key in allExpenses[changedMonth]){
         for(let i = 0; i < allExpenses[changedMonth][key].length; i++){
-            if(typeof stats[allExpenses[changedMonth][key][i].category] == 'undefined') stats[allExpenses[changedMonth][key][i].category] = {total:0, count:0};
-            stats[allExpenses[changedMonth][key][i].category].total += parseFloat(allExpenses[changedMonth][key][i].amount);
-            stats[allExpenses[changedMonth][key][i].category].count++;
+            let catName = arrangedCategoriesById[allExpenses[changedMonth][key][i].categoryId].name;
+            if(typeof stats[catName] == 'undefined') stats[catName] = {total:0, count:0};
+            stats[catName].total += parseFloat(allExpenses[changedMonth][key][i].amount);
+            stats[catName].count++;
             totalSum += parseFloat(allExpenses[changedMonth][key][i].amount);
         }
     }
@@ -192,9 +195,13 @@ async function loadExpenses(month){
     if(data.status){
         expensesTbody.innerHTML = '';
         let totalSum = 0;
-        let totalTransactions = 0;
-        allExpenses[month] = data.data.expenses;
-        const finalExpenses = data.data.expenses;
+        let totalExpenses = 0;
+        const finalExpenses = {};
+        data.data.expenses.forEach(element => {
+            if (typeof finalExpenses[element.date] == 'undefined') finalExpenses[element.date] = [];
+            finalExpenses[element.date].push(element);
+        });
+        allExpenses[month] = finalExpenses;
         if(Object.entries(finalExpenses).length > 0){
             for(let key in finalExpenses){
                 let sum = 0;
@@ -216,8 +223,8 @@ async function loadExpenses(month){
                     cell_2 = row.insertCell(1);
                     cell_3 = row.insertCell(2);
                     cell_l.innerHTML = `
-                        <div class="title">${finalExpenses[key][i].description}</div>
-                        <div class="category">${finalExpenses[key][i].category}</div>
+                        <div class="title">${finalExpenses[key][i].title}</div>
+                        <div class="category">${arrangedCategoriesById[finalExpenses[key][i].categoryId].name}</div>
                         <input type="hidden" name="expense-field" class="expense-field" value='${JSON.stringify(finalExpenses[key][i])}'>
                     `;
                     cell_l.addEventListener("click", editExpense);
@@ -228,7 +235,7 @@ async function loadExpenses(month){
                             <span class="glyphicon glyphicon-trash"></span> 
                         </button>
                     `;
-                    totalTransactions++;
+                    totalExpenses++;
                 }
                 totalSum += sum
             }
@@ -246,9 +253,9 @@ async function loadExpenses(month){
             //         </div>
             //     `;
             //     cell1.innerHTML = `
-            //         <div class="content description-content">${item.description}</div>
+            //         <div class="content title-content">${item.title}</div>
             //         <div class="content-html hide">
-            //             <input type="text" name="description[]" class="description-field" placeholder="Description" value="${item.description}">
+            //             <input type="text" name="title[]" class="title-field" placeholder="Description" value="${item.title}">
             //         </div>
             //         `;
             //     cell2.innerHTML = `
@@ -283,7 +290,7 @@ async function loadExpenses(month){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
-        document.getElementById("totalSum").innerHTML = `&#8377; ${totalSum.toLocaleString()} (${totalTransactions})`;
+        document.getElementById("totalSum").innerHTML = `&#8377; ${totalSum.toLocaleString()} (${totalExpenses})`;
     }else{
         cell1.textContent = data.error;
         await showStatusMessage(data.error, 'false');
@@ -328,10 +335,10 @@ function editExpense(td) {
     let expenseData = this.querySelector('.expense-field').value;
     expenseData = JSON.parse(expenseData);
     const form = document.getElementById("update-expense-form");
-    form.querySelector('.date-field').value = isDateHaveWeekdayFormat(expenseData.date) ? formatDate(expenseData.date, true) : expenseData.date;
-    form.querySelector('.expense-id-field').value = expenseData.id;
-    form.querySelector('.description-field').value = expenseData.description;
-    form.querySelector('.category-field').value = expenseData.category;
+    form.querySelector('.date-field').value = new Date(expenseData.date).toISOString().split('T')[0];
+    form.querySelector('.expense-id-field').value = expenseData._id;
+    form.querySelector('.title-field').value = expenseData.title;
+    form.querySelector('.category-field').value = expenseData.categoryId;
     form.querySelector('.amount-field').value = expenseData.amount;
     form.classList.remove("hide");
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -349,8 +356,8 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
     const form = document.getElementById("update-expense-form");
     const id = form.querySelector('.expense-id-field').value;
     const date = form.querySelector('.date-field').value;
-    const description = form.querySelector('.description-field').value;
-    const category = form.querySelector('.category-field').value;
+    const title = form.querySelector('.title-field').value;
+    const categoryId = form.querySelector('.category-field').value;
     const amount = form.querySelector('.amount-field').value;
 
     let formSubmitData = await fetch("/expenses/"+id, {
@@ -358,7 +365,7 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({date, description, category, amount, currentMonth}),
+        body: JSON.stringify({date, title, categoryId, amount, currentMonth}),
     });
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
@@ -375,7 +382,7 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
 //     const form = document.getElementById("update-expense-form");
 //     const id = form.querySelector('.expense-id-field').value;
 //     const date = form.querySelector('.date-field').value;
-//     const description = form.querySelector('.description-field').value;
+//     const title = form.querySelector('.title-field').value;
 //     const category = form.querySelector('.category-field').value;
 //     const amount = form.querySelector('.amount-field').value;
 //     let formSubmitData = await fetch("/expenses/"+id, {
@@ -383,7 +390,7 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
 //         headers: {
 //             "Content-Type": "application/json"
 //         },
-//         body: JSON.stringify({date, description, category, amount, currentMonth}),
+//         body: JSON.stringify({date, title, category, amount, currentMonth}),
 //     });
 //     formSubmitData = await formSubmitData.json();
 //     if(formSubmitData.status){
@@ -450,9 +457,10 @@ async function loadCategories(){
     // const select = document.getElementsByClassName("category-field")[0];
     document.querySelectorAll(".category-field").forEach(select => {
         data.data.categories.forEach(category => {
+            arrangedCategoriesById[category._id] = category;
             let option = document.createElement("option");
-            option.value = category;
-            option.text = category;
+            option.value = category._id;
+            option.text = category.name;
             if(category === 'Other')    option.selected = true;
             select.appendChild(option);
         });

@@ -1,11 +1,11 @@
 
-const groupByDate = (transactions) => {
-    return transactions.reduce((acc, transaction) => {
-      if (!acc[transaction.date]) {
-        acc[transaction.date] = { total: 0, expenses: [] };
+const groupByDate = (expenses) => {
+    return expenses.reduce((acc, expense) => {
+      if (!acc[expense.date]) {
+        acc[expense.date] = { total: 0, expenses: [] };
       }
-      acc[transaction.date].total += transaction.amount;
-      acc[transaction.date].expenses.push(transaction);
+      acc[expense.date].total += expense.amount;
+      acc[expense.date].expenses.push(expense);
       return acc;
     }, {});
 };
