@@ -39,6 +39,16 @@ const deletecategory = async(id) => {
     return data;
 };
 
+const createOrUpdate = async(newCategory) => {
+    const data = await categoryModel.updateOne(
+        { name: newCategory }, // Search condition
+        { $setOnInsert: { name: newCategory } }, // Only set fields on insert
+        { upsert: true } // Create if not exists
+    );
+
+    return data;
+};
+
 module.exports = {
     getcategories,
     getcategory,
@@ -46,4 +56,5 @@ module.exports = {
     updatecategory,
     deletecategory,
     getCategoryByCondition,
+    createOrUpdate,
 };

@@ -55,6 +55,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     const dateFields = form.querySelectorAll(".date-field");
     const amountFields = form.querySelectorAll(".amount-field");
     const categoryFields = form.querySelectorAll(".category-field");
+    const newCategoryFields = form.querySelectorAll(".new-category-field");
     const titleFields = form.querySelectorAll(".title-field");
 
     // Collect data from each form field group
@@ -62,8 +63,9 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
         formDataArray.push({
             date: dateFields[index].value,
             amount: amountFields[index].value,
-            category: categoryFields[index].value,
-            title: titleFields[index].value
+            categoryId: categoryFields[index].value,
+            title: titleFields[index].value,
+            newCategory: newCategoryFields[index].value
         });
     });
     let formSubmitData = await fetch("/expenses", {
@@ -75,6 +77,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     });
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
+        $('#addExpenseModal').modal('hide');
         await showStatusMessage("Added Successfully!", 'true');
         document.getElementById("add-expense-collaps-btn").click();
     }else{
@@ -239,49 +242,6 @@ async function loadExpenses(month){
                 }
                 totalSum += sum
             }
-            // data.data.expenses.forEach(item => {
-            //     let row = expensesTbody.insertRow();
-            //     let cell0 = row.insertCell(0);
-            //     let cell1 = row.insertCell(1);
-            //     let cell2 = row.insertCell(2);
-            //     let cell3 = row.insertCell(3);
-            //     let cell4 = row.insertCell(4);
-            //     cell0.innerHTML = `
-            //         <div class="content date-content">${item.date}</div>
-            //         <div class="content-html hide">
-            //             <input type="date" name="date[]" class="date-field" value="${new Date().toISOString().split('T')[0]}" required>
-            //         </div>
-            //     `;
-            //     cell1.innerHTML = `
-            //         <div class="content title-content">${item.title}</div>
-            //         <div class="content-html hide">
-            //             <input type="text" name="title[]" class="title-field" placeholder="Description" value="${item.title}">
-            //         </div>
-            //         `;
-            //     cell2.innerHTML = `
-            //         <div class="content category-content">${item.category}</div>
-            //         <div class="content-html hide">
-            //             <select name="category[]" class="category-field" required>
-            //                 ${categories.map(e => `<option value="${e}" ${e === item.category ? 'selected' : ''}>${e}</option>`).join('')}
-            //             </select>
-            //         </div>
-            //     `;
-            //     cell3.innerHTML = `
-            //         <div class="content amount-content">${item.amount}</div>
-            //         <div class="content-html hide">
-            //             <input type="number" name="amount[]" class="amount-field" placeholder="Amount" value="${parseFloat(item.amount)}" required>
-            //         </div>`;
-            //     cell4.innerHTML = `<td>
-            //             <div class="action-btns">
-            //                 <input type="hidden" name="id" class="id-field" value="${item.id}">
-            //                 <button class="edit-btn" onclick="editExpense(this)">Edit</button>
-            //                 <button class="update-btn hide" onclick="updateExpense(this)">Update</button>
-            //                 <button class="cancel-btn hide" onclick="cancelEditExpense(this)">Cancel</button>
-            //                 <button class="delete-btn"  onclick="deleteExpense(this)">Delete</button>
-            //             </div>
-            //         </td>`;
-            //     sum += parseFloat(item.amount);
-            // });
             loadStats(month);
         }else{
             let row = expensesTbody.insertRow();

@@ -23,12 +23,9 @@ const createExpense = async(body) => {
         const { categoryId, amount, date, title, newCategory } = body[i];
         let finalSubCategoryId = categoryId;
         if (newCategory) {
-            const newCategoryCreated = await categoryService.updateOne(
-                { name: newCategory }, // Search condition
-                { $setOnInsert: { name: newCategory } }, // Only set fields on insert
-                { upsert: true } // Create if not exists
-              );
-            finalSubCategoryId = newCategoryCreated._id;
+            const newCategoryCreated = await categoryService.createOrUpdate(newCategory);
+            console.log("newCategoryCreated: ",newCategoryCreated)
+            finalSubCategoryId = newCategoryCreated.upsertedId;
         }
         const expenseModelObj = new expenseModel({
             categoryId: finalSubCategoryId, amount, date, title,
