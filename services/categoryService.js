@@ -1,4 +1,6 @@
 const categoryModel = require("../models/categoryModel");
+const expenseModel = require("../models/expenseModel");
+const budgetModel = require("../models/budgetModel");
 
 const getcategories = async() => {
     const categories = await categoryModel.find();
@@ -34,7 +36,10 @@ const updatecategory = async(id, body) => {
 };
 
 const deletecategory = async(id) => {
-    const data = await categoryModel.findByIdAndDelete(id);
+    const data = [];
+    data.push(await expenseModel.deleteMany({categoryId: id}));
+    data.push(await budgetModel.deleteMany({categoryId: id}));
+    data.push(await categoryModel.findByIdAndDelete(id));
 
     return data;
 };

@@ -49,10 +49,21 @@ const deletecategory = async (req, res) => {
     }
 };
 
+const deleteByMultipleIds = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const response = await categoryService.deleteByMultipleIds(id);
+        return successResponse(res, response);
+    } catch (error) {
+        return errorResponse(res, error);
+    }
+};
+
 module.exports = {
     getcategories,
     getcategory,
     create,
     updatecategory,
     deletecategory,
+    deleteByMultipleIds,
 };

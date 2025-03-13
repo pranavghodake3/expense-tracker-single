@@ -1,15 +1,17 @@
 const budgetModel = require("../models/budgetModel");
 const { getcategories } = require("./categoryService");
+const currentYear = new Date().getFullYear().toString();
+const currentMonth =  (new Date().getMonth()) + 1;
 
-const getBudgets = async() => {
-    const budgets = await budgetModel.find();
+const getBudgets = async(month = null) => {
+    const budgets = await budgetModel.find({month: month ? month : currentMonth});
 
     return {
         budgets,
     };
 };
 
-const getbudget = async(id) => {
+const getBudget = async(id) => {
     const data = await budgetModel.findById(id);
 
     return data;
@@ -30,9 +32,6 @@ const create = async(body) => {
 
 const addCurrentMonthBudgets = async(body) => {
     const { categories } = await getcategories();
-    const currentYear = new Date().getFullYear().toString();
-    const currentMonth =  (new Date().getMonth()) + 1;
-    console.log("currentYear: ",currentYear, "currentMonth: ",currentMonth)
     const data = [];
     for (let i = 0; i < categories.length; i++) {
         const budget = {
@@ -63,6 +62,12 @@ const deletebudget = async(id) => {
     return data;
 };
 
+const deleteBudgetsByCondition = async(condition) => {
+    const data = await budgetModel.deleteMany(condition);
+
+    return data;
+};
+
 const createOrUpdate = async(newBudget) => {
     const data = await budgetModel.updateOne(
         { name: newBudget }, // Search condition
@@ -75,11 +80,12 @@ const createOrUpdate = async(newBudget) => {
 
 module.exports = {
     getBudgets,
-    getbudget,
+    getBudget,
     create,
     updatebudget,
     deletebudget,
     getBudgetByCondition,
     createOrUpdate,
     addCurrentMonthBudgets,
+    deleteBudgetsByCondition,
 };

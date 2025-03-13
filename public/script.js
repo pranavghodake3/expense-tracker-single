@@ -233,7 +233,7 @@ async function loadExpenses(month){
                     cell_l.addEventListener("click", editExpense);
                     cell_2.innerHTML = `<div class="amount">&#8377; ${parseFloat(finalExpenses[key][i].amount).toLocaleString()} </div>`;
                     cell_3.innerHTML = `
-                        <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i].id}">
+                        <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i]._id}">
                         <button type="button" class="btn btn-default btn-sm" onclick="deleteExpense(this)">
                             <span class="glyphicon glyphicon-trash"></span> 
                         </button>

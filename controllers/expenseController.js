@@ -43,7 +43,7 @@ const updateExpense = async (req, res) => {
 const deleteExpenseById = async (req, res) => {
     try {
         const id = req.params.id;
-        const response = await expenseService.deleteExpenseById(id);
+        const response = await expenseService.deleteExpense(id);
         return successResponse(res, response);
     } catch (error) {
         return errorResponse(res, error);
