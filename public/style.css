@@ -49,8 +49,10 @@ tr.date-row {
 }
 .row.expense-info{
     margin: 0 1px 7px;
-    background: antiquewhite;
+    /* background: antiquewhite; */
     padding: 5px;
+    /* font-size: 17px; */
+    background-color: pink;
 }
 .single-expense-form{
     border: 1px solid #d4d1d1;
@@ -97,11 +99,9 @@ form{
 .panel-heading.add-expense-title{
     background: #c1c1dd;
 }
-.row.expense-info{
-    font-size: 17px;
-    background-color: pink;
-}
 #expenses tr td:first-child {
     cursor: pointer;
 }
-  
+.expense-info div {
+    padding: 0px;
+}

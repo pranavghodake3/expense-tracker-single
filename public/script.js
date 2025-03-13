@@ -427,7 +427,27 @@ async function loadCategories(){
     });
 }
 
+async function loadBudgets(){
+    let data = await fetch('/budgets');
+    data = await data.json();
+    const budgets = data.data.budgets;
+    const budgetsTbody = document.getElementById("budgets-tbody");
+    budgets.forEach(e => {
+        row = budgetsTbody.insertRow();
+        row.classList.add('expense-row');
+        cell_l = row.insertCell(0);
+        cell_2 = row.insertCell(1);
+        cell_3 = row.insertCell(2);
+        cell_4 = row.insertCell(3);
+        cell_l.innerHTML = `${arrangedCategoriesById[e.categoryId].name}`;
+        cell_2.innerHTML = `&#8377; ${e.spent}`;
+        cell_3.innerHTML = `&#8377; ${e.limit}`;
+        cell_4.innerHTML = `&#8377; ${e.remaining}`;
+    });
+}
+
 window.onload = async function(){
     await loadCategories();
     await loadExpenses(currentMonth);
+    await loadBudgets();
 };

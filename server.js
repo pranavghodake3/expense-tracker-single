@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const expenseRoute = require("./routes/expenseRoute");
 const categoryRoute = require("./routes/categoryRoute");
+const budgetRoute = require("./routes/budgetRoute");
 const homeRoute = require("./routes/homeRoute");
 const bodyParser = require('body-parser');
 const session = require("express-session");
@@ -27,6 +28,7 @@ app.use(express.static('public'));
 app.get('/', homeRoute);
 app.use("/expenses", expenseRoute);
 app.use("/categories", categoryRoute);
+app.use("/budgets", budgetRoute);
 
 app.listen(PORT, () => {
     console.log("Server started on PORT: ", PORT)
