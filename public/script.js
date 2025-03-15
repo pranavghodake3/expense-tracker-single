@@ -3,15 +3,15 @@ const allExpenses = {};
 let categories = [];
 const arrangedCategoriesById = {};
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const select = document.getElementById("month");
+const monthDropdown = document.getElementById("month");
 months.forEach((month, index) => {
     let option = document.createElement("option");
     option.value = month;
     option.text = month;
-    select.appendChild(option);
+    monthDropdown.appendChild(option);
 });
 let currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
-select.value = currentMonth;
+monthDropdown.value = currentMonth;
 document.getElementById("currentYear").innerHTML = new Date().getFullYear().toString();
 
 document.getElementById("addField").addEventListener("click", function() {
@@ -435,41 +435,103 @@ async function loadCategories(){
 async function loadBudgets(){
     let data = await fetch('/budgets');
     data = await data.json();
-    const budgets = data.data.budgets;
+    const categorizedBudgets = {};
     const budgetsTbody = document.getElementById("budgets-tbody");
     budgetsTbody.innerHTML = '';
-    budgets.forEach(e => {
+    const budgets = data.data.budgets;
+    budgets.forEach(e => categorizedBudgets[e.categoryId] = e);
+    console.log("categories: ",categories)
+    categories.forEach(cat => {
+        const spent = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].spent : 0;
+        const limit = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].limit : 0;
+        const remaining = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].remaining : 0;
         row = budgetsTbody.insertRow();
         row.classList.add('expense-row');
         cell_l = row.insertCell(0);
         cell_2 = row.insertCell(1);
         cell_3 = row.insertCell(2);
         cell_4 = row.insertCell(3);
-        cell_l.innerHTML = `${arrangedCategoriesById[e.categoryId].name}`;
-        cell_2.innerHTML = `&#8377; ${e.spent}`;
-        cell_3.innerHTML = `&#8377; ${e.limit} ${
-            e.limit == 0 ?
-            '<button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#setLimitModal" category-id="'+e.categoryId+'" budget-id="'+e._id+'" onclick="setLimit(this)">Set</button>' :
-            '<button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#updateLimitModal" category-id="'+e.categoryId+'" budget-id="'+e._id+'" onclick="updateLimit(this)">Update</button>'
+        cell_l.innerHTML = `${cat.name}`;
+        cell_2.innerHTML = `&#8377; ${spent}`;
+        cell_3.innerHTML = `&#8377; ${limit} ${
+            categorizedBudgets[cat._id] ?
+            '<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#updateLimitModal" category-id="'+cat._id+'" budget-id="'+categorizedBudgets[cat._id]._id+'" limit="'+limit+'" spent="'+spent+'" onclick="updateLimit(this)">Update</button>'
+            :
+            '<button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#setLimitModal" category-id="'+cat._id+'" limit="'+limit+'" onclick="setLimit(this)">Set</button>'
         }`;
-        cell_4.innerHTML = `&#8377; ${e.remaining}`;
+        cell_4.innerHTML = `&#8377; ${remaining}`;
     });
 }
 async function setLimit(button) {
     const categoryId = button.getAttribute('category-id');
+    const limit = button.getAttribute('limit');
     const form = document.getElementById("set-budget-form");
     form.querySelector(".category-id-field").value = categoryId;
+    form.querySelector(".limit-field").value = limit;
     form.querySelector(".limit-category-name").textContent = arrangedCategoriesById[categoryId].name;
 }
 async function updateLimit(button) {
     const budgetId = button.getAttribute('budget-id');
     const categoryId = button.getAttribute('category-id');
+    const spent = button.getAttribute('spent');
+    const limit = button.getAttribute('limit');
     const form = document.getElementById("update-budget-form");
     form.querySelector(".budget-id-field").value = budgetId;
+    form.querySelector(".spent-field").value = spent;
+    form.querySelector(".limit-field").value = limit;
     console.log("FFF: ",form.querySelector(".limit-category-name"))
     form.querySelector(".limit-category-name").classList.add("123");
     form.querySelector(".limit-category-name").textContent = arrangedCategoriesById[categoryId].name;
 }
+document.getElementById("set-budget-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const form = document.getElementById("set-budget-form");
+    const categoryId = form.querySelector('.category-id-field').value;
+    const limit = form.querySelector('.limit-field').value;
+    const month = (months.indexOf(monthDropdown.value)) + 1;
+    const year = new Date().getFullYear().toString();
+
+    let formSubmitData = await fetch("/budgets/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({categoryId, spent: 0, remaining: limit, limit, month, year}),
+    });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        $('#setLimitModal').modal('hide');
+        await loadExpenses(currentMonth);
+        await showStatusMessage('Updated successfuly!', 'true', [loadBudgets]);
+    }else{
+        await showStatusMessage(formSubmitData.error, 'false');
+    }
+});
+document.getElementById("update-budget-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const form = document.getElementById("update-budget-form");
+    const budgetId = form.querySelector('.budget-id-field').value;
+    const limit = form.querySelector('.limit-field').value;
+    const spent = form.querySelector('.spent-field').value;
+    const month = (months.indexOf(monthDropdown.value)) + 1;
+    const year = new Date().getFullYear().toString();
+
+    let formSubmitData = await fetch("/budgets/"+budgetId, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({limit, remaining: (parseFloat(limit) - parseFloat(spent))}),
+    });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        $('#updateLimitModal').modal('hide');
+        await loadExpenses(currentMonth);
+        await showStatusMessage('Updated successfuly!', 'true', [loadBudgets]);
+    }else{
+        await showStatusMessage(formSubmitData.error, 'false');
+    }
+});
 
 window.onload = async function(){
     await loadCategories();
