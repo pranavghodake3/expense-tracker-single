@@ -35,10 +35,14 @@ const createExpense = async(body) => {
         });
         const response = await expenseModelObj.save();
         const budget = await budgetModel.findOne({categoryId: finalSubCategoryId, month: currentMonth});
-        budgetModel.findByIdAndUpdate(budget.id, {
-            spent: budget.spent+amount,
-            remaining: budget.remaining-amount
+        console.log("Existing budget: ",budget)
+        const spentTotal = parseFloat(budget.spent) + parseFloat(amount);
+        const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
+        const updatedBudget = await budgetModel.findByIdAndUpdate(budget._id, {
+            spent: spentTotal,
+            remaining: remainingTotal,
         });
+        console.log("updatedBudget: ",updatedBudget)
         data.push(response);
     }
 
@@ -71,10 +75,14 @@ const deleteExpense = async(id) => {
     const budget = await budgetModel.findOne({categoryId: expense.categoryId, month: expenseMonth+1});
     console.log("budget: ",budget)
     if(budget){
-
+        const spentTotal = parseFloat(budget.spent) - parseFloat(expense.amount);
+        const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
+        const budgetUpdate = await budgetModel.findByIdAndUpdate(budget._id, {
+            spent: spentTotal,
+            remaining: remainingTotal,
+        });
+        console.log("budgetUpdate: ",budgetUpdate)
     }
-    budgetModel.findByIdAndUpdate(budget._id, {spent: budget.spent-expense.amount, remaining: budget.remaining+expense.amount})
-    await budgetModel.deleteMany({categoryId: expense.categoryId, month: expenseMonth+1});
     const data = await expenseModel.findByIdAndDelete(id);
 
     return data;

@@ -37,7 +37,7 @@ const addCurrentMonthBudgets = async(body) => {
         const budget = {
             spent: 0,
             limit: 50,
-            remaining: 0,
+            remaining: 50,
         }
         const response = await budgetModel.updateOne(
             { categoryId: categories[i]._id, year: currentYear, month: currentMonth },

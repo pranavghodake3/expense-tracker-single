@@ -78,8 +78,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         $('#addExpenseModal').modal('hide');
-        await showStatusMessage("Added Successfully!", 'true');
-        document.getElementById("add-expense-collaps-btn").click();
+        await showStatusMessage("Added Successfully!", 'true', [loadExpenses, loadBudgets]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -165,7 +164,7 @@ function hideStatus(button){
 document.querySelectorAll(".date-field").forEach(input => {
     input.value = new Date().toISOString().split('T')[0];
 });
-async function showStatusMessage(formStatusMessage, formStatus){
+async function showStatusMessage(formStatusMessage, formStatus, funArr = []){
     const formStatusElement = document.getElementsByClassName(formStatus == 'true' ? 'alert-success' : 'alert-danger')[0];
     formStatusElement.classList.remove('hide');
     if(formStatusMessage){
@@ -174,6 +173,11 @@ async function showStatusMessage(formStatusMessage, formStatus){
         formStatusElement.classList.add(formStatus);
         setTimeout(() => {
             formStatusElement.classList.add('hide');
+            if(funArr.length > 0){
+                for (let i = 0; i < funArr.length; i++) {
+                    funArr[i]();
+                }
+            }
         }, formStatus === "true" ? 1000 : 3000);
     }
     if(formStatus == 'true')    await clearFormFields();
@@ -182,7 +186,7 @@ async function clearFormFields(){
     document.querySelectorAll(".single-expense-form-extra").forEach(e => e.remove());
     document.getElementById("add-expense-form").reset();
     // document.getElementById("add-expense-collaps-btn").click();
-    await loadExpenses(currentMonth);
+    // await loadExpenses(currentMonth);
 }
 
 async function loadExpenses(month){
@@ -331,7 +335,7 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
     if(formSubmitData.status){
         form.classList.add("hide");
         await loadExpenses(currentMonth);
-        await showStatusMessage('Updated successfuly!', 'true');
+        await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -394,7 +398,8 @@ async function deleteExpense(button) {
                 }
             });
             tr.remove();
-            await showStatusMessage('Deleted successfuly!', 'true');
+            await showStatusMessage('Deleted successfuly!', 'true', [loadExpenses, loadBudgets]);
+            await loadBudgets();
             await loadExpenses(currentMonth);
         }else{
             await showStatusMessage(formSubmitData.error, 'false');
@@ -432,6 +437,7 @@ async function loadBudgets(){
     data = await data.json();
     const budgets = data.data.budgets;
     const budgetsTbody = document.getElementById("budgets-tbody");
+    budgetsTbody.innerHTML = '';
     budgets.forEach(e => {
         row = budgetsTbody.insertRow();
         row.classList.add('expense-row');
@@ -441,9 +447,28 @@ async function loadBudgets(){
         cell_4 = row.insertCell(3);
         cell_l.innerHTML = `${arrangedCategoriesById[e.categoryId].name}`;
         cell_2.innerHTML = `&#8377; ${e.spent}`;
-        cell_3.innerHTML = `&#8377; ${e.limit}`;
+        cell_3.innerHTML = `&#8377; ${e.limit} ${
+            e.limit == 0 ?
+            '<button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#setLimitModal" category-id="'+e.categoryId+'" budget-id="'+e._id+'" onclick="setLimit(this)">Set</button>' :
+            '<button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#updateLimitModal" category-id="'+e.categoryId+'" budget-id="'+e._id+'" onclick="updateLimit(this)">Update</button>'
+        }`;
         cell_4.innerHTML = `&#8377; ${e.remaining}`;
     });
+}
+async function setLimit(button) {
+    const categoryId = button.getAttribute('category-id');
+    const form = document.getElementById("set-budget-form");
+    form.querySelector(".category-id-field").value = categoryId;
+    form.querySelector(".limit-category-name").textContent = arrangedCategoriesById[categoryId].name;
+}
+async function updateLimit(button) {
+    const budgetId = button.getAttribute('budget-id');
+    const categoryId = button.getAttribute('category-id');
+    const form = document.getElementById("update-budget-form");
+    form.querySelector(".budget-id-field").value = budgetId;
+    console.log("FFF: ",form.querySelector(".limit-category-name"))
+    form.querySelector(".limit-category-name").classList.add("123");
+    form.querySelector(".limit-category-name").textContent = arrangedCategoriesById[categoryId].name;
 }
 
 window.onload = async function(){
