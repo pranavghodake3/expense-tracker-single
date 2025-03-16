@@ -14,7 +14,6 @@ const getExpenses = async(month = null, categoryId = null) => {
         date: { $gte: startDate, $lt: endDate }
     };
     if(categoryId)  filter.categoryId = categoryId;
-
     const expenses = await expenseModel.find(filter).sort({date: -1});
 
     return {

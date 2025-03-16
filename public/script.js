@@ -3,6 +3,7 @@ const allExpenses = {};
 let categories = [];
 let currentIncome = 0;
 let monthlyGrantTotal = 0;
+let monthlyIncomeId;
 const arrangedCategoriesById = {};
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const monthDropdown = document.getElementById("month");
@@ -443,12 +444,14 @@ async function onMonthChange(event){
     cancelUpdateExpense();
     await loadExpenses();
     await loadBudgets();
+    await loadIncome();
 }
 async function loadCategories(){
     let data = await fetch('/categories');
     data = await data.json();
     categories = data.data.categories;
     // const select = document.getElementsByClassName("category-field")[0];
+    const categoriesTbody = document.getElementById("categories-tbody");
     document.querySelectorAll(".category-field").forEach(select => {
         data.data.categories.forEach(category => {
             arrangedCategoriesById[category._id] = category;
@@ -458,6 +461,11 @@ async function loadCategories(){
             if(category === 'Other')    option.selected = true;
             select.appendChild(option);
         });
+    });
+    data.data.categories.forEach(category => {
+        row = categoriesTbody.insertRow();
+        cell_l = row.insertCell(0);
+        cell_l.innerHTML = category.name;
     });
 }
 
@@ -573,12 +581,19 @@ async function loadIncome(){
     let data = await fetch('/income-transactions?month='+currentMonth);
     data = await data.json();
     const incomeTransactions = data.data.incomeTransactions;
-    if(incomeTransactions){
-        $("#update-income-form").find(".income-id-field").val(incomeTransactions[0]._id);
+    currentIncome = 0;
+    monthlyIncomeId = null;
+    let remaining = 0
+    if(incomeTransactions.length > 0){
         currentIncome = incomeTransactions[0].amount;
-        $(".income").find(".amount").text(incomeTransactions[0].amount);
-        $(".remaining").find(".amount").text(parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal));
+        monthlyIncomeId = incomeTransactions[0]._id;
+        remaining = parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal);
+        // $(".income").find(".amount").text(incomeTransactions[0].amount);
+        // $(".remaining").find(".amount").text(parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal));
     }
+    $("#update-income-form").find(".income-id-field").val(monthlyIncomeId);
+    $(".income").find(".amount").text(currentIncome);
+    $(".remaining").find(".amount").text(remaining);
 }
 document.getElementById("update-income-form").addEventListener("submit", async function(event) {
     event.preventDefault();
@@ -587,19 +602,35 @@ document.getElementById("update-income-form").addEventListener("submit", async f
     const income = form.querySelector('.income-field').value;
     const month = months.indexOf(monthDropdown.value);
     const year = new Date().getFullYear().toString();
-
-    let formSubmitData = await fetch("/income-transactions/"+incomeId, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            month,
-            year,
-            amount: income,
-            spentTotal: monthlyGrantTotal,
-        }),
-    });
+    let formSubmitData;
+    if(incomeId){
+        formSubmitData = await fetch("/income-transactions/"+incomeId, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                month,
+                year,
+                amount: income,
+                spentTotal: monthlyGrantTotal,
+            }),
+        });
+    }else{
+        formSubmitData = await fetch("/income-transactions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                month,
+                year,
+                amount: income,
+                spentTotal: monthlyGrantTotal,
+            }),
+        });
+    }
+    
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         $('#updateIncomeModal').modal('hide');

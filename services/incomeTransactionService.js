@@ -1,9 +1,11 @@
 const incomeTransactionModel = require("../models/incomeTransactionModel");
 const expenseModel = require("../models/expenseModel");
 const budgetModel = require("../models/budgetModel");
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-const getIncomeTransactions = async() => {
-    const incomeTransactions = await incomeTransactionModel.find();
+const getIncomeTransactions = async(month = null) => {
+    const monthIndex = months.indexOf(month);
+    const incomeTransactions = await incomeTransactionModel.find({month: monthIndex});
 
     return {
         incomeTransactions,
