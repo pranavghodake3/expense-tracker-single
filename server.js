@@ -1,11 +1,15 @@
 const express = require("express");
 const app = express();
 const expenseRoute = require("./routes/expenseRoute");
+const categoryRoute = require("./routes/categoryRoute");
+const budgetRoute = require("./routes/budgetRoute");
+const incomeTransactionRoute = require("./routes/incomeTransactionRoute");
 const homeRoute = require("./routes/homeRoute");
 const bodyParser = require('body-parser');
 const session = require("express-session");
-const { getCategories } = require("./controllers/expenseController");
+const connectDB = require("./config/db");
 require("dotenv").config();
+connectDB();
 
 const PORT = process.env.PORT ?? 5000;
 app.use(
@@ -24,7 +28,9 @@ app.use(express.static('public'));
 // Home Route - Show Posts
 app.get('/', homeRoute);
 app.use("/expenses", expenseRoute);
-app.get("/categories", getCategories);
+app.use("/categories", categoryRoute);
+app.use("/budgets", budgetRoute);
+app.use("/income-transactions", incomeTransactionRoute);
 
 app.listen(PORT, () => {
     console.log("Server started on PORT: ", PORT)
