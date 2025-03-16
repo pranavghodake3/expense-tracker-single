@@ -2,10 +2,20 @@ const expenseModel = require("../models/expenseModel");
 const categoryModel = require("../models/categoryModel");
 const budgetModel = require("../models/budgetModel");
 const currentYear = new Date().getFullYear().toString();
-const currentMonth =  (new Date().getMonth()) + 1;
+const currentMonth =  new Date().getMonth();
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-const getExpenses = async() => {
-    const expenses = await expenseModel.find().sort({date: -1});
+const getExpenses = async(month = null, categoryId = null) => {
+    const monthIndex = months.indexOf(month);
+    const startDate = new Date(currentYear, monthIndex, 1);
+    const endDate = new Date(currentYear, monthIndex+1, 1);
+
+    const filter = {
+        date: { $gte: startDate, $lt: endDate }
+    };
+    if(categoryId)  filter.categoryId = categoryId;
+
+    const expenses = await expenseModel.find(filter).sort({date: -1});
 
     return {
         expenses,
@@ -35,14 +45,14 @@ const createExpense = async(body) => {
         });
         const response = await expenseModelObj.save();
         const budget = await budgetModel.findOne({categoryId: finalSubCategoryId, month: currentMonth});
-        console.log("Existing budget: ",budget)
-        const spentTotal = parseFloat(budget.spent) + parseFloat(amount);
-        const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
-        const updatedBudget = await budgetModel.findByIdAndUpdate(budget._id, {
-            spent: spentTotal,
-            remaining: remainingTotal,
-        });
-        console.log("updatedBudget: ",updatedBudget)
+        if(budget){
+            const spentTotal = parseFloat(budget.spent) + parseFloat(amount);
+            const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
+            const updatedBudget = await budgetModel.findByIdAndUpdate(budget._id, {
+                spent: spentTotal,
+                remaining: remainingTotal,
+            });
+        }
         data.push(response);
     }
 

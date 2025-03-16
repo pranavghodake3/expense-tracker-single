@@ -1,10 +1,13 @@
 const budgetModel = require("../models/budgetModel");
+const expenseModel = require("../models/expenseModel");
 const { getcategories } = require("./categoryService");
 const currentYear = new Date().getFullYear().toString();
-const currentMonth =  (new Date().getMonth()) + 1;
+const currentMonth =  (new Date().getMonth());
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const getBudgets = async(month = null) => {
-    const budgets = await budgetModel.find({month: month ? month : currentMonth});
+    const monthIndex = month ? months.indexOf(month) : currentMonth;
+    const budgets = await budgetModel.find({month: monthIndex});
 
     return {
         budgets,
@@ -24,10 +27,25 @@ const getBudgetByCondition = async(condition) => {
 };
 
 const create = async(body) => {
-    const budgetModelObj = new budgetModel(body);
-    const data = await budgetModelObj.save();
+    const startDate = new Date(currentYear, body.month, 1);
+    const endDate = new Date(currentYear, body.month+1, 1);
+    const expenses = await expenseModel.find({
+        date: { $gte: startDate, $lt: endDate },
+        categoryId: body.categoryId,
+    }).sort({date: -1});
+    let categoryTotal = 0;
+    expenses.forEach(expense => {
+        categoryTotal += parseFloat(expense.amount)
+    });
+    body.spent = categoryTotal;
+    body.remaining = parseFloat(body.limit) - categoryTotal;
 
-    return data;
+    const budgetModelObj = new budgetModel(body);
+    const budget = await budgetModelObj.save();
+
+    
+
+    return budget;
 };
 
 const addCurrentMonthBudgets = async(body) => {

@@ -3,7 +3,9 @@ const { successResponse, errorResponse } = require("../utils/responseHelper");
 
 const getExpenses = async (req, res) => {
     try {
-        const response = await expenseService.getExpenses();
+        const month = req?.query?.month ?? null;
+        const categoryId = req?.query?.categoryId ?? null;
+        const response = await expenseService.getExpenses(month, categoryId);
         return successResponse(res, response);
     } catch (error) {
         return errorResponse(res, error);

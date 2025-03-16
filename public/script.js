@@ -102,6 +102,25 @@ function showStatus(button){
     document.getElementById('hide-stats-btn').classList.remove("hide");
     document.getElementById('stats').classList.remove("hide");
 }
+function getStats(){
+    let stats = {};
+    let totalSum = 0;
+    console.log("allExpenses: ",allExpenses)
+
+    for(let key in allExpenses[currentMonth]){
+        for(let i = 0; i < allExpenses[currentMonth][key].length; i++){
+            let catName = arrangedCategoriesById[allExpenses[currentMonth][key][i].categoryId].name;
+            if(typeof stats[catName] == 'undefined') stats[catName] = {total:0, count:0};
+            stats[catName].total += parseFloat(allExpenses[currentMonth][key][i].amount);
+            stats[catName].count++;
+            totalSum += parseFloat(allExpenses[currentMonth][key][i].amount);
+        }
+    }
+    stats = Object.fromEntries(
+        Object.entries(stats).sort(([, v1], [, v2]) => v2.total - v1.total)
+      );
+    return stats;
+}
 function loadStats(changedMonth){
     let stats = {};
     let totalSum = 0;
@@ -189,7 +208,7 @@ async function clearFormFields(){
     // await loadExpenses(currentMonth);
 }
 
-async function loadExpenses(month){
+async function loadExpenses(categoryId = null){
     const expensesTbody = document.getElementById("expenses");
     expensesTbody.innerHTML = '';
     let row = expensesTbody.insertRow();
@@ -197,7 +216,9 @@ async function loadExpenses(month){
     cell1.colSpan = 5;
     cell1.style.textAlign  = "center";
     cell1.textContent = "Loadding...";
-    let data = await fetch('/expenses?month='+month);
+    let expensesUrl = `/expenses?month=${currentMonth}`;
+    if(categoryId)  expensesUrl += `&categoryId=${categoryId}`;
+    let data = await fetch(expensesUrl);
     data = await data.json();
     if(data.status){
         expensesTbody.innerHTML = '';
@@ -208,7 +229,7 @@ async function loadExpenses(month){
             if (typeof finalExpenses[element.date] == 'undefined') finalExpenses[element.date] = [];
             finalExpenses[element.date].push(element);
         });
-        allExpenses[month] = finalExpenses;
+        allExpenses[currentMonth] = finalExpenses;
         if(Object.entries(finalExpenses).length > 0){
             for(let key in finalExpenses){
                 let sum = 0;
@@ -246,7 +267,6 @@ async function loadExpenses(month){
                 }
                 totalSum += sum
             }
-            loadStats(month);
         }else{
             let row = expensesTbody.insertRow();
             let cell1 = row.insertCell(0);
@@ -334,7 +354,6 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         form.classList.add("hide");
-        await loadExpenses(currentMonth);
         await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
@@ -399,8 +418,6 @@ async function deleteExpense(button) {
             });
             tr.remove();
             await showStatusMessage('Deleted successfuly!', 'true', [loadExpenses, loadBudgets]);
-            await loadBudgets();
-            await loadExpenses(currentMonth);
         }else{
             await showStatusMessage(formSubmitData.error, 'false');
         }
@@ -412,8 +429,8 @@ async function deleteExpense(button) {
 async function onMonthChange(event){
     currentMonth = event.value;
     cancelUpdateExpense();
-    await loadExpenses(event.value);
-    loadStats(event.value);
+    await loadExpenses();
+    await loadBudgets();
 }
 async function loadCategories(){
     let data = await fetch('/categories');
@@ -433,7 +450,9 @@ async function loadCategories(){
 }
 
 async function loadBudgets(){
-    let data = await fetch('/budgets');
+    const stats = getStats();
+    console.log("stats:",stats)
+    let data = await fetch('/budgets?month='+currentMonth);
     data = await data.json();
     const categorizedBudgets = {};
     const budgetsTbody = document.getElementById("budgets-tbody");
@@ -452,7 +471,11 @@ async function loadBudgets(){
         cell_3 = row.insertCell(2);
         cell_4 = row.insertCell(3);
         cell_l.innerHTML = `${cat.name}`;
-        cell_2.innerHTML = `&#8377; ${spent}`;
+        cell_2.innerHTML = `
+            &#8377; ${spent}(${typeof stats[cat.name] == 'undefined' ? 0 : stats[cat.name].count})
+            <input type="hidden" class="category-id-field" value="${cat._id}">
+        `;
+        cell_2.addEventListener("click", loadCategorizedExpenses);
         cell_3.innerHTML = `&#8377; ${limit} ${
             categorizedBudgets[cat._id] ?
             '<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#updateLimitModal" category-id="'+cat._id+'" budget-id="'+categorizedBudgets[cat._id]._id+'" limit="'+limit+'" spent="'+spent+'" onclick="updateLimit(this)">Update</button>'
@@ -461,6 +484,10 @@ async function loadBudgets(){
         }`;
         cell_4.innerHTML = `&#8377; ${remaining}`;
     });
+}
+async function loadCategorizedExpenses(){
+    const categoryId = this.querySelector(".category-id-field").value;
+    await loadExpenses(categoryId);
 }
 async function setLimit(button) {
     const categoryId = button.getAttribute('category-id');
@@ -488,7 +515,7 @@ document.getElementById("set-budget-form").addEventListener("submit", async func
     const form = document.getElementById("set-budget-form");
     const categoryId = form.querySelector('.category-id-field').value;
     const limit = form.querySelector('.limit-field').value;
-    const month = (months.indexOf(monthDropdown.value)) + 1;
+    const month = months.indexOf(monthDropdown.value);
     const year = new Date().getFullYear().toString();
 
     let formSubmitData = await fetch("/budgets/", {
@@ -501,8 +528,7 @@ document.getElementById("set-budget-form").addEventListener("submit", async func
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         $('#setLimitModal').modal('hide');
-        await loadExpenses(currentMonth);
-        await showStatusMessage('Updated successfuly!', 'true', [loadBudgets]);
+        await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -513,8 +539,6 @@ document.getElementById("update-budget-form").addEventListener("submit", async f
     const budgetId = form.querySelector('.budget-id-field').value;
     const limit = form.querySelector('.limit-field').value;
     const spent = form.querySelector('.spent-field').value;
-    const month = (months.indexOf(monthDropdown.value)) + 1;
-    const year = new Date().getFullYear().toString();
 
     let formSubmitData = await fetch("/budgets/"+budgetId, {
         method: "PUT",
@@ -526,8 +550,7 @@ document.getElementById("update-budget-form").addEventListener("submit", async f
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         $('#updateLimitModal').modal('hide');
-        await loadExpenses(currentMonth);
-        await showStatusMessage('Updated successfuly!', 'true', [loadBudgets]);
+        await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -535,6 +558,6 @@ document.getElementById("update-budget-form").addEventListener("submit", async f
 
 window.onload = async function(){
     await loadCategories();
-    await loadExpenses(currentMonth);
+    await loadExpenses();
     await loadBudgets();
 };
