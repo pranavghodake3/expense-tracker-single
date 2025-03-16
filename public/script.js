@@ -1,6 +1,8 @@
 
 const allExpenses = {};
 let categories = [];
+let currentIncome = 0;
+let monthlyGrantTotal = 0;
 const arrangedCategoriesById = {};
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const monthDropdown = document.getElementById("month");
@@ -13,6 +15,15 @@ months.forEach((month, index) => {
 let currentMonth = new Date().toLocaleString('en-US', { month: 'short' });
 monthDropdown.value = currentMonth;
 document.getElementById("currentYear").innerHTML = new Date().getFullYear().toString();
+
+$("table").on("click", "td", function () {
+    $("td").removeClass("td-clicked"); // Remove the class from all cells
+    $(this).toggleClass("td-clicked");    // Add the class to the clicked cell
+});
+$(".expense-info").on("click", ".income", function () {
+    $("#updateIncomeModal").modal('show');
+    $("#update-income-form").find(".income-field").val(currentIncome);
+});
 
 document.getElementById("addField").addEventListener("click", function() {
     const container = document.getElementById("fieldsContainer");
@@ -274,6 +285,7 @@ async function loadExpenses(categoryId = null){
             cell1.style.textAlign  = "center";
             cell1.textContent = "No expenses";
         }
+        monthlyGrantTotal = totalSum;
         document.getElementById("totalSum").innerHTML = `&#8377; ${totalSum.toLocaleString()} (${totalExpenses})`;
     }else{
         cell1.textContent = data.error;
@@ -555,9 +567,51 @@ document.getElementById("update-budget-form").addEventListener("submit", async f
         await showStatusMessage(formSubmitData.error, 'false');
     }
 });
+async function loadIncome(){
+    const stats = getStats();
+    console.log("stats:",stats)
+    let data = await fetch('/income-transactions?month='+currentMonth);
+    data = await data.json();
+    const incomeTransactions = data.data.incomeTransactions;
+    if(incomeTransactions){
+        $("#update-income-form").find(".income-id-field").val(incomeTransactions[0]._id);
+        currentIncome = incomeTransactions[0].amount;
+        $(".income").find(".amount").text(incomeTransactions[0].amount);
+        $(".remaining").find(".amount").text(parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal));
+    }
+}
+document.getElementById("update-income-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const form = document.getElementById("update-income-form");
+    const incomeId = form.querySelector('.income-id-field').value;
+    const income = form.querySelector('.income-field').value;
+    const month = months.indexOf(monthDropdown.value);
+    const year = new Date().getFullYear().toString();
+
+    let formSubmitData = await fetch("/income-transactions/"+incomeId, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            month,
+            year,
+            amount: income,
+            spentTotal: monthlyGrantTotal,
+        }),
+    });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        $('#updateIncomeModal').modal('hide');
+        await showStatusMessage('Updated successfuly!', 'true', [loadIncome]);
+    }else{
+        await showStatusMessage(formSubmitData.error, 'false');
+    }
+});
 
 window.onload = async function(){
     await loadCategories();
     await loadExpenses();
     await loadBudgets();
+    await loadIncome();
 };

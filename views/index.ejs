@@ -49,7 +49,7 @@
     <div class="row expense-info">
         <div class="col-xs-4 income">
             <div>Income</div>
-            <div>500</div>
+            <div class="amount">0</div>
         </div>
         <div class="col-xs-4">
             <div>
@@ -62,7 +62,7 @@
         </div>
         <div class="col-xs-4 remaining">
             <div>Remaining</div>
-            <div>500</div>
+            <div class="amount">0</div>
         </div>
     </div>
     <div class="panel-group expense-stats">
@@ -243,6 +243,38 @@
                     </div>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
                     <button type="button" class="btn btn-default" onclick="onCancelClick(this);">Cancel</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Income Modal -->
+    <div id="updateIncomeModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Update Income</h4>
+            </div>
+            <div class="modal-body">
+                <form id="update-income-form">
+                    <div id="fieldsContainer">
+                        <div class="single-expense-form">
+                            <div class="form-group">
+                                <label for="income">Income</label>
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" name="income_id" class="income-id-field" value="">
+                                <input type="number" name="income" class="form-control income-field" placeholder="Amount" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </form>
             </div>
             <div class="modal-footer">

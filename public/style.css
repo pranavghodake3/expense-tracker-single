@@ -105,3 +105,7 @@ form{
 .expense-info div {
     padding: 0px;
 }
+.td-clicked {
+    background-color: #d9edf7; /* Light blue background */
+    transition: background-color 0.3s;
+}
