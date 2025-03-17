@@ -109,3 +109,9 @@ form{
     background-color: #d9edf7; /* Light blue background */
     transition: background-color 0.3s;
 }
+tr.expense-title-row {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+  

@@ -108,25 +108,6 @@
             </div>
         </div>
     </div>
-    <form id="update-expense-form" class="update-expense-form hide">
-        <div id="fieldsContainertest">
-            <div class="form-group">
-                <input type="date" name="date" class=" form-control date-field" required>
-            </div>
-            <div class="form-group">
-                <input type="number" name="amount" class="form-control amount-field" placeholder="Amount" required>
-            </div>
-            <div class="form-group">
-                <input type="text" name="title" class="form-control title-field" placeholder="Description">
-            </div>
-            <div class="form-group">
-                <select name="category" class="form-control category-field" required></select>
-            </div>
-            <input type="hidden" name="expense_id" class="expense-id-field">
-        </div>
-        <button type="submit" class="btn btn-primary" id="update-btn">Update</button>
-        <button type="button" class="btn btn-default" onclick="cancelUpdateExpense(this);">Cancel</button>
-    </form>
     <table class="table table-bordered table-responsive expenses-table">
         <tbody id="expenses"></tbody>
     </table>
@@ -174,9 +155,48 @@
         </div>
     </div>
 
+    <!-- Update Expense Modal -->
+    <div id="updateExpenseModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Update Expense</h4>
+            </div>
+            <div class="modal-body">
+                <form id="update-expense-form" class="update-expense-form">
+                    <div id="fieldsContainertest">
+                        <div class="form-group">
+                            <input type="date" name="date" class=" form-control date-field" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" name="amount" class="form-control amount-field" placeholder="Amount" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="title" class="form-control title-field" placeholder="Description">
+                        </div>
+                        <div class="form-group">
+                            <select name="category" class="form-control category-field" required></select>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="new_category" class="form-control new-category-field" placeholder="New Category">
+                        </div>
+                        <input type="hidden" name="expense_id" class="expense-id-field">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="update-btn">Update</button>
+                    <button type="button" class="btn btn-default" onclick="cancelUpdateExpense(this);">Cancel</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Set Limit Modal -->
     <div id="setLimitModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -208,7 +228,7 @@
 
     <!-- Update Limit Modal -->
     <div id="updateLimitModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -270,7 +290,8 @@
             </div>
         </div>
     </div>
-</div>
+
+</div><!-- end container div -->
 
 <script src="/node_modules/jquery/dist/jquery.min.js"></script>
 <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>

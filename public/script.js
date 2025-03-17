@@ -39,12 +39,15 @@ document.getElementById("addField").addEventListener("click", function() {
             <input type="number" name="amount[]" class="form-control amount-field" placeholder="Amount" required>
         </div>
         <div class="form-group">
+            <input type="text" name="title[]" class="form-control title-field" placeholder="Description">
+        </div>
+        <div class="form-group">
             <select name="category[]" class="form-control category-field" required>
                  ${categories.map(e => `<option value="${e._id}" ${e.name === 'Other' ? 'selected' : ''}>${e.name}</option>`).join('')}
             </select>
         </div>
         <div class="form-group">
-            <input type="text" name="title[]" class="form-control title-field" placeholder="Description">
+            <input type="text" name="new_category[]" class="form-control new-category-field" placeholder="New Category">
         </div>
         <button type="button" class="remove-btn">Remove</button>
     `;
@@ -234,6 +237,12 @@ async function loadExpenses(categoryId = null){
     data = await data.json();
     if(data.status){
         expensesTbody.innerHTML = '';
+        row = expensesTbody.insertRow();
+        row.classList.add('expense-title-row');
+        cell1 = row.insertCell(0);
+        cell1.colSpan = 5;
+        cell1.style.textAlign  = "center";
+        cell1.innerHTML = categoryId ? `${arrangedCategoriesById[categoryId].name} - Expenses <button type="button" class="btn btn-primary btn-xs" onclick="loadExpenses();">Reset</button>` : 'Monthly Expenses';
         let totalSum = 0;
         let totalExpenses = 0;
         const finalExpenses = {};
@@ -337,8 +346,9 @@ function editExpense(td) {
     form.querySelector('.title-field').value = expenseData.title;
     form.querySelector('.category-field').value = expenseData.categoryId;
     form.querySelector('.amount-field').value = expenseData.amount;
-    form.classList.remove("hide");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    $("#updateExpenseModal").modal("show");
+    // form.classList.remove("hide");
+    // window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function cancelUpdateExpense(){
     document.querySelector(".expenses-table").classList.remove("hide");
@@ -366,7 +376,7 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
     });
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
-        form.classList.add("hide");
+        $("#updateExpenseModal").modal("hide");
         await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
@@ -458,7 +468,7 @@ async function loadCategories(){
             let option = document.createElement("option");
             option.value = category._id;
             option.text = category.name;
-            if(category === 'Other')    option.selected = true;
+            if(category.name === 'Other')    option.selected = true;
             select.appendChild(option);
         });
     });
@@ -492,17 +502,17 @@ async function loadBudgets(){
         cell_4 = row.insertCell(3);
         cell_l.innerHTML = `${cat.name}`;
         cell_2.innerHTML = `
-            &#8377; ${spent}(${typeof stats[cat.name] == 'undefined' ? 0 : stats[cat.name].count})
+            &#8377; ${spent.toLocaleString()}(${typeof stats[cat.name] == 'undefined' ? 0 : stats[cat.name].count})
             <input type="hidden" class="category-id-field" value="${cat._id}">
         `;
         cell_2.addEventListener("click", loadCategorizedExpenses);
-        cell_3.innerHTML = `&#8377; ${limit} ${
+        cell_3.innerHTML = `&#8377; ${limit.toLocaleString()} ${
             categorizedBudgets[cat._id] ?
             '<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#updateLimitModal" category-id="'+cat._id+'" budget-id="'+categorizedBudgets[cat._id]._id+'" limit="'+limit+'" spent="'+spent+'" onclick="updateLimit(this)">Update</button>'
             :
             '<button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#setLimitModal" category-id="'+cat._id+'" limit="'+limit+'" onclick="setLimit(this)">Set</button>'
         }`;
-        cell_4.innerHTML = `&#8377; ${remaining}`;
+        cell_4.innerHTML = `&#8377; ${remaining.toLocaleString()}`;
     });
 }
 async function loadCategorizedExpenses(){
@@ -577,7 +587,6 @@ document.getElementById("update-budget-form").addEventListener("submit", async f
 });
 async function loadIncome(){
     const stats = getStats();
-    console.log("stats:",stats)
     let data = await fetch('/income-transactions?month='+currentMonth);
     data = await data.json();
     const incomeTransactions = data.data.incomeTransactions;
@@ -588,12 +597,10 @@ async function loadIncome(){
         currentIncome = incomeTransactions[0].amount;
         monthlyIncomeId = incomeTransactions[0]._id;
         remaining = parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal);
-        // $(".income").find(".amount").text(incomeTransactions[0].amount);
-        // $(".remaining").find(".amount").text(parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal));
     }
     $("#update-income-form").find(".income-id-field").val(monthlyIncomeId);
-    $(".income").find(".amount").text(currentIncome);
-    $(".remaining").find(".amount").text(remaining);
+    $(".income").find(".amount").text(currentIncome.toLocaleString());
+    $(".remaining").find(".amount").text(remaining.toLocaleString());
 }
 document.getElementById("update-income-form").addEventListener("submit", async function(event) {
     event.preventDefault();
