@@ -39,8 +39,6 @@ const updateIncomeTransaction = async(id, body) => {
 
 const deleteIncomeTransaction = async(id) => {
     const data = [];
-    data.push(await expenseModel.deleteMany({incomeTransactionId: id}));
-    data.push(await budgetModel.deleteMany({incomeTransactionId: id}));
     data.push(await incomeTransactionModel.findByIdAndDelete(id));
 
     return data;

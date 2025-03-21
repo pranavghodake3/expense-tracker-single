@@ -1,6 +1,7 @@
 const expenseModel = require("../models/expenseModel");
 const categoryModel = require("../models/categoryModel");
 const budgetModel = require("../models/budgetModel");
+const incomeTransactionModel = require("../models/incomeTransactionModel");
 const currentYear = new Date().getFullYear().toString();
 const currentMonth =  new Date().getMonth();
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -31,6 +32,7 @@ const getExpenseById = async(id) => {
 
 const createExpense = async(body) => {
     const data = [];
+    let totalSpent = 0;
     for (let i = 0; i < body.length; i++) {
         const { categoryId, amount, date, title, newCategory } = body[i];
         let finalSubCategoryId = categoryId;
@@ -57,6 +59,14 @@ const createExpense = async(body) => {
             });
         }
         data.push(response);
+        totalSpent += parseFloat(amount);
+    }
+    const incomeFilter = {
+        month: currentMonth, year: currentYear
+    };
+    const incomeTransaction = await incomeTransactionModel.find(incomeFilter);
+    if(incomeTransaction){
+        await incomeTransactionModel.findByIdAndUpdate(incomeTransaction[0]._id, {spentTotal: totalSpent + parseFloat(incomeTransaction[0].spentTotal)})
     }
 
     return data;

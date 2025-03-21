@@ -1,4 +1,4 @@
-
+const ruppeeSymbol = '&#8377;';
 const allExpenses = {};
 let categories = [];
 let currentIncome = 0;
@@ -164,7 +164,7 @@ function loadStats(changedMonth){
         let cell1 = row.insertCell(0);
         let cell2 = row.insertCell(1);
         cell1.innerHTML = key+": ";
-        cell2.innerHTML = `&#8377; ${stats[key].total.toLocaleString()} (${stats[key].count})`;
+        cell2.innerHTML = `${ruppeeSymbol} ${stats[key].total.toLocaleString()} (${stats[key].count})`;
     }
     // for (const key in stats) {
     //     const container = document.getElementById("stats-body");
@@ -185,7 +185,7 @@ function loadStats(changedMonth){
     //     li.classList.add("list-group-item");
     //     let categoryPercentage = Math.round((parseFloat(stats[key])/totalSum)*100);
     //     li.innerHTML = `
-    //         ${key} <span class="badge">&#8377;${parseFloat(stats[key]).toLocaleString()}</span>
+    //         ${key} <span class="badge">${ruppeeSymbol}${parseFloat(stats[key]).toLocaleString()}</span>
     //     `;
     //     statsList.appendChild(li);
     // }
@@ -263,7 +263,7 @@ async function loadExpenses(categoryId = null){
                 let cell_3 = row.insertCell(2);
                 // isDateHaveWeekdayFormat(expenseData.date) ? formatDate(expenseData.date, true) : expenseData.date;
                 cell_l.innerHTML = formatDateNew(key);
-                cell_2.innerHTML = `&#8377; ${sum.toLocaleString()} (${finalExpenses[key].length})`;
+                cell_2.innerHTML = `${ruppeeSymbol} ${sum.toLocaleString()} (${finalExpenses[key].length})`;
                 cell_3.innerHTML = '';
                 for(let i = 0; i < finalExpenses[key].length; i++){
                     row = expensesTbody.insertRow();
@@ -277,7 +277,7 @@ async function loadExpenses(categoryId = null){
                         <input type="hidden" name="expense-field" class="expense-field" value='${JSON.stringify(finalExpenses[key][i])}'>
                     `;
                     cell_l.addEventListener("click", editExpense);
-                    cell_2.innerHTML = `<div class="amount">&#8377; ${parseFloat(finalExpenses[key][i].amount).toLocaleString()} </div>`;
+                    cell_2.innerHTML = `<div class="amount">${ruppeeSymbol} ${parseFloat(finalExpenses[key][i].amount).toLocaleString()} </div>`;
                     cell_3.innerHTML = `
                         <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i]._id}">
                         <button type="button" class="btn btn-default btn-sm" onclick="deleteExpense(this)">
@@ -296,7 +296,7 @@ async function loadExpenses(categoryId = null){
             cell1.textContent = "No expenses";
         }
         monthlyGrantTotal = totalSum;
-        document.getElementById("totalSum").innerHTML = `&#8377; ${totalSum.toLocaleString()} (${totalExpenses})`;
+        document.getElementById("totalSum").innerHTML = `${ruppeeSymbol} ${totalSum.toLocaleString()} (${totalExpenses})`;
     }else{
         cell1.textContent = data.error;
         await showStatusMessage(data.error, 'false');
@@ -462,7 +462,8 @@ async function loadCategories(){
     categories = data.data.categories;
     // const select = document.getElementsByClassName("category-field")[0];
     const categoriesTbody = document.getElementById("categories-tbody");
-    document.querySelectorAll(".category-field").forEach(select => {
+    categoriesTbody.innerHTML = '';
+    document.querySelectorAll(".category-dropdown").forEach(select => {
         data.data.categories.forEach(category => {
             arrangedCategoriesById[category._id] = category;
             let option = document.createElement("option");
@@ -473,10 +474,19 @@ async function loadCategories(){
         });
     });
     data.data.categories.forEach(category => {
-        row = categoriesTbody.insertRow();
-        cell_l = row.insertCell(0);
+        let row = categoriesTbody.insertRow();
+        let cell_l = row.insertCell(0);
         cell_l.innerHTML = category.name;
+        cell_l.setAttribute("category-id", category._id);
+        cell_l.setAttribute("category-name", category.name);
+        cell_l.addEventListener("click", editCategory);
     });
+}
+async function editCategory(td){
+    console.log("FFF: ",$(this).attr("category-name"), ", R: ",$("#update-category-form").find("input[name='name']"))
+    $("#updateCategoryModal").modal("show");
+    $("#update-category-form").find("input[name='categoryId']").val($(this).attr("category-id"));
+    $("#update-category-form").find("input[name='name']").val($(this).attr("category-name"));
 }
 
 async function loadBudgets(){
@@ -494,25 +504,25 @@ async function loadBudgets(){
         const spent = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].spent : 0;
         const limit = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].limit : 0;
         const remaining = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].remaining : 0;
-        row = budgetsTbody.insertRow();
+        let row = budgetsTbody.insertRow();
         row.classList.add('expense-row');
-        cell_l = row.insertCell(0);
-        cell_2 = row.insertCell(1);
-        cell_3 = row.insertCell(2);
-        cell_4 = row.insertCell(3);
+        let cell_l = row.insertCell(0);
+        let cell_2 = row.insertCell(1);
+        let cell_3 = row.insertCell(2);
+        let cell_4 = row.insertCell(3);
         cell_l.innerHTML = `${cat.name}`;
         cell_2.innerHTML = `
-            &#8377; ${spent.toLocaleString()}(${typeof stats[cat.name] == 'undefined' ? 0 : stats[cat.name].count})
+            ${ruppeeSymbol} ${spent.toLocaleString()}(${typeof stats[cat.name] == 'undefined' ? 0 : stats[cat.name].count})
             <input type="hidden" class="category-id-field" value="${cat._id}">
         `;
         cell_2.addEventListener("click", loadCategorizedExpenses);
-        cell_3.innerHTML = `&#8377; ${limit.toLocaleString()} ${
+        cell_3.innerHTML = `${ruppeeSymbol} ${limit.toLocaleString()} ${
             categorizedBudgets[cat._id] ?
             '<button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#updateLimitModal" category-id="'+cat._id+'" budget-id="'+categorizedBudgets[cat._id]._id+'" limit="'+limit+'" spent="'+spent+'" onclick="updateLimit(this)">Update</button>'
             :
             '<button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#setLimitModal" category-id="'+cat._id+'" limit="'+limit+'" onclick="setLimit(this)">Set</button>'
         }`;
-        cell_4.innerHTML = `&#8377; ${remaining.toLocaleString()}`;
+        cell_4.innerHTML = `${ruppeeSymbol} ${remaining.toLocaleString()}`;
     });
 }
 async function loadCategorizedExpenses(){
@@ -599,8 +609,8 @@ async function loadIncome(){
         remaining = parseFloat(incomeTransactions[0].amount) - parseFloat(incomeTransactions[0].spentTotal);
     }
     $("#update-income-form").find(".income-id-field").val(monthlyIncomeId);
-    $(".income").find(".amount").text(currentIncome.toLocaleString());
-    $(".remaining").find(".amount").text(remaining.toLocaleString());
+    $(".income").find(".amount").html(`${ruppeeSymbol} ${currentIncome.toLocaleString()}`);
+    $(".remaining").find(".amount").html(`${ruppeeSymbol} ${remaining.toLocaleString()}`);
 }
 document.getElementById("update-income-form").addEventListener("submit", async function(event) {
     event.preventDefault();
@@ -646,6 +656,41 @@ document.getElementById("update-income-form").addEventListener("submit", async f
         await showStatusMessage(formSubmitData.error, 'false');
     }
 });
+
+$('#update-category-form').on("submit", async function (e) {
+    e.preventDefault();
+    const formDataArray = $(this).serializeArray();
+    const formDataJson = {};
+    $.each(formDataArray, function(_, field) {
+        formDataJson[field.name] = field.value;
+    });
+    const categoryId = formDataJson['categoryId'];
+    console.log("formDataJson: ",formDataJson.name)
+    let formSubmitData = await fetch("/categories/"+categoryId, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: formDataJson.name
+        }),
+    });
+    formSubmitData = await formSubmitData.json();
+    if(formSubmitData.status){
+        $('#updateCategoryModal').modal('hide');
+        await showStatusMessage('Updated successfuly!', 'true', [loadCategories, loadExpenses, loadBudgets]);
+    }else{
+        await showStatusMessage(formSubmitData.error, 'false');
+    }
+});
+$(".show-panel").on("click", function (event){
+    const buttonName = $(this).attr("butn-name");
+    if(buttonName == "budgets"){
+        $("#categories-body").removeClass("in");
+    }else if(buttonName == "categories"){
+        $("#budget-body").removeClass("in");
+    }
+})
 
 window.onload = async function(){
     await loadCategories();

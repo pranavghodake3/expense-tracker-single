@@ -73,10 +73,10 @@
                         <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#addExpenseModal">Add Expense</button>
                     </div>
                     <div class="col-xs-4">
-                        <a data-toggle="collapse" class="btn btn-warning btn-xs" href="#budget-body">Budget</a>
+                        <a data-toggle="collapse" class="btn btn-warning btn-xs show-panel" butn-name="budgets" href="#budget-body">Budget</a>
                     </div>
                     <div class="col-xs-4">
-                        <a data-toggle="collapse" class="btn btn-primary btn-xs" href="#categories-body">Categories</a>
+                        <a data-toggle="collapse" class="btn btn-primary btn-xs show-panel" btn-name="categories" href="#categories-body">Categories</a>
                     </div>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                                 <input type="text" name="title[]" class="form-control title-field" placeholder="Description">
                             </div>
                             <div class="form-group">
-                                <select name="categoryId[]" class="form-control category-field" required></select>
+                                <select name="categoryId[]" class="form-control category-field category-dropdown" required></select>
                             </div>
                             <div class="form-group">
                                 <input type="text" name="new_category[]" class="form-control new-category-field" placeholder="New Category">
@@ -176,7 +176,7 @@
                             <input type="text" name="title" class="form-control title-field" placeholder="Description">
                         </div>
                         <div class="form-group">
-                            <select name="category" class="form-control category-field" required></select>
+                            <select name="category" class="form-control category-field category-dropdown" required></select>
                         </div>
                         <div class="form-group">
                             <input type="text" name="new_category" class="form-control new-category-field" placeholder="New Category">
@@ -282,6 +282,37 @@
                     </div>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="updateCategoryModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Update Category</h4>
+            </div>
+            <div class="modal-body">
+                <form id="update-category-form">
+                    <div id="fieldsContainer">
+                        <div class="single-expense-form">
+                            <div class="form-group">
+                                <label for="category">Category Name</label>
+                            </div>
+                            <div class="form-group">
+                                <input type="hidden" name="categoryId" class="category-id-field" value="">
+                                <input type="text" name="name" class="form-control category-field" placeholder="Category" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
                 </form>
             </div>
             <div class="modal-footer">
