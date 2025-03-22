@@ -11,41 +11,6 @@
 <div class="container">
     <div class="alert alert-success hide"></div>
     <div class="alert alert-danger hide"></div>
-    <!-- <div class="panel-group expense-stats">
-        <div class="panel panel-default">
-            <div class="panel-heading add-expense-title">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" id="add-expense-collaps-btn" href="#collapse1">Add Expense</a>
-                </h4>
-            </div>
-            <div id="collapse1" class="panel-collapse collapse">
-                <form id="add-expense-form">
-                    <div id="fieldsContainertest">
-                        <div class="single-expense-form">
-                            <div class="form-group">
-                                <input type="date" name="date[]" class=" form-control date-field" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="number" name="amount[]" class="form-control amount-field" placeholder="Amount" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="text" name="title[]" class="form-control title-field" placeholder="Description">
-                            </div>
-                            <div class="form-group">
-                                <select name="categoryId[]" class="form-control category-field" required></select>
-                            </div>
-                            <div class="form-group">
-                                <input type="text" name="new_category[]" class="form-control new-category-field" placeholder="New Category">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
-                    <button type="button" class="btn btn-default" onclick="onCancelClick(this);">Cancel</button>
-                    <button type="button" class="btn btn-info" id="addFieldold">Add more</button>
-                </form>
-            </div>
-        </div>
-    </div> -->
     <div class="row expense-info">
         <div class="col-xs-4 income">
             <div>Income</div>
@@ -76,7 +41,7 @@
                         <a data-toggle="collapse" class="btn btn-warning btn-xs show-panel" butn-name="budgets" href="#budget-body">Budget</a>
                     </div>
                     <div class="col-xs-4">
-                        <a data-toggle="collapse" class="btn btn-primary btn-xs show-panel" btn-name="categories" href="#categories-body">Categories</a>
+                        <a data-toggle="collapse" class="btn btn-primary btn-xs show-panel" butn-name="categories" href="#categories-body">Categories</a>
                     </div>
                 </div>
             </div>
@@ -144,7 +109,6 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
-                    <button type="button" class="btn btn-default" onclick="onCancelClick(this);">Cancel</button>
                     <button type="button" class="btn btn-info" id="addField">Add more</button>
                 </form>
             </div>
@@ -184,7 +148,6 @@
                         <input type="hidden" name="expense_id" class="expense-id-field">
                     </div>
                     <button type="submit" class="btn btn-primary" id="update-btn">Update</button>
-                    <button type="button" class="btn btn-default" onclick="cancelUpdateExpense(this);">Cancel</button>
                 </form>
             </div>
             <div class="modal-footer">
@@ -216,7 +179,6 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
-                    <button type="button" class="btn btn-default" onclick="onCancelClick(this);">Cancel</button>
                 </form>
             </div>
             <div class="modal-footer">
@@ -249,7 +211,6 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
-                    <button type="button" class="btn btn-default" onclick="onCancelClick(this);">Cancel</button>
                 </form>
             </div>
             <div class="modal-footer">
@@ -281,7 +242,6 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" id="submit-btn">Update</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </form>
             </div>
             <div class="modal-footer">

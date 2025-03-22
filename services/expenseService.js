@@ -25,8 +25,10 @@ const getExpenses = async(month = null, categoryId = null) => {
 const getExpenseById = async(id) => {
     const expense = await expenseModel.findById(id);
 
+
     return {
         expense,
+        // tt: await getTotalMonthExpense('Mar')
     };
 };
 
@@ -35,21 +37,22 @@ const createExpense = async(body) => {
     let totalSpent = 0;
     for (let i = 0; i < body.length; i++) {
         const { categoryId, amount, date, title, newCategory } = body[i];
-        let finalSubCategoryId = categoryId;
+        let finalCategoryId = categoryId;
+        const expenseMonth = new Date(date).getMonth();
+        const expenseYear = new Date(date).getFullYear();
         if (newCategory) {
             const newCategoryCreated = await categoryModel.updateOne(
                 { name: newCategory }, // Search condition
                 { $setOnInsert: { name: newCategory } }, // Only set fields on insert
                 { upsert: true } // Create if not exists
             );
-            console.log("newCategoryCreated: ",newCategoryCreated)
-            finalSubCategoryId = newCategoryCreated.upsertedId;
+            finalCategoryId = newCategoryCreated.upsertedId;
         }
         const expenseModelObj = new expenseModel({
-            categoryId: finalSubCategoryId, amount, date, title,
+            categoryId: finalCategoryId, amount, date, title,
         });
         const response = await expenseModelObj.save();
-        const budget = await budgetModel.findOne({categoryId: finalSubCategoryId, month: currentMonth});
+        const budget = await budgetModel.findOne({categoryId: finalCategoryId, month: expenseMonth});
         if(budget){
             const spentTotal = parseFloat(budget.spent) + parseFloat(amount);
             const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
@@ -60,31 +63,31 @@ const createExpense = async(body) => {
         }
         data.push(response);
         totalSpent += parseFloat(amount);
+        const incomeFilter = {  month: expenseMonth, year: expenseYear };
+        let incomeTransactionObj = await incomeTransactionModel.find(incomeFilter);
+        if(incomeTransactionObj){
+            await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: totalSpent + parseFloat(incomeTransactionObj[0].spentTotal)});
+        }
     }
-    const incomeFilter = {
-        month: currentMonth, year: currentYear
-    };
-    const incomeTransaction = await incomeTransactionModel.find(incomeFilter);
-    if(incomeTransaction){
-        await incomeTransactionModel.findByIdAndUpdate(incomeTransaction[0]._id, {spentTotal: totalSpent + parseFloat(incomeTransaction[0].spentTotal)})
-    }
+    
 
     return data;
 };
 
 const updateExpense = async(id, body) => {
     const { categoryId, amount, date, title, newCategory } = body;
-    let finalSubCategoryId = categoryId;
+    let finalCategoryId = categoryId;
+    const expenseMonth = new Date(date).getMonth();
+    const expenseYear = new Date(date).getFullYear();
     if (newCategory) {
         const newCategoryCreated = await categoryModel.updateOne(
             { name: newCategory }, // Search condition
             { $setOnInsert: { name: newCategory } }, // Only set fields on insert
             { upsert: true } // Create if not exists
         );
-        console.log("newCategoryCreated: ",newCategoryCreated)
-        finalSubCategoryId = newCategoryCreated.upsertedId;
+        finalCategoryId = newCategoryCreated.upsertedId;
     }
-    const budget = await budgetModel.findOne({categoryId: finalSubCategoryId, month: currentMonth});
+    const budget = await budgetModel.findOne({categoryId: finalCategoryId, month: expenseMonth});
     if(budget){
         const spentTotal = parseFloat(budget.spent) + parseFloat(amount);
         const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
@@ -93,17 +96,26 @@ const updateExpense = async(id, body) => {
             remaining: remainingTotal,
         });
     }
-    const data = await expenseModel.findByIdAndUpdate(id, {categoryId: finalSubCategoryId, amount, date, title});
+    const data = await expenseModel.findByIdAndUpdate(id, {categoryId: finalCategoryId, amount, date, title});
+    const incomeFilter = {  month: expenseMonth, year: expenseYear };
+    let incomeTransactionObj = await incomeTransactionModel.find(incomeFilter);
+    if(incomeTransactionObj){
+        await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: await getTotalMonthExpense(months[expenseMonth])});
+    }
 
     return data;
+};
+const getTotalMonthExpense = async(month) => {
+    const response = await getExpenses(month);
+    const totalExpense = response.expenses.reduce((acc, exp) => acc + parseFloat(exp.amount), 0);
+    return totalExpense;
 };
 
 const deleteExpense = async(id) => {
     const expense = await expenseModel.findById(id);
     const expenseMonth = new Date(expense.date).getMonth();
-    console.log("expense: ",expense, ", expenseMonth: ",expenseMonth)
-    const budget = await budgetModel.findOne({categoryId: expense.categoryId, month: expenseMonth+1});
-    console.log("budget: ",budget)
+    const expenseYear = new Date(expense.date).getFullYear();
+    const budget = await budgetModel.findOne({categoryId: expense.categoryId, month: expenseMonth});
     if(budget){
         const spentTotal = parseFloat(budget.spent) - parseFloat(expense.amount);
         const remainingTotal = parseFloat(budget.limit) - parseFloat(spentTotal);
@@ -111,9 +123,13 @@ const deleteExpense = async(id) => {
             spent: spentTotal,
             remaining: remainingTotal,
         });
-        console.log("budgetUpdate: ",budgetUpdate)
     }
     const data = await expenseModel.findByIdAndDelete(id);
+    const incomeFilter = {  month: expenseMonth, year: expenseYear };
+    let incomeTransactionObj = await incomeTransactionModel.find(incomeFilter);
+    if(incomeTransactionObj){
+        await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: parseFloat(incomeTransactionObj[0].spentTotal) - parseFloat(expense.amount)});
+    }
 
     return data;
 };

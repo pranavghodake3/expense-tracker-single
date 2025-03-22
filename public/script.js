@@ -23,7 +23,7 @@ $("table").on("click", "td", function () {
 });
 $(".expense-info").on("click", ".income", function () {
     $("#updateIncomeModal").modal('show');
-    $("#update-income-form").find(".income-field").val(currentIncome);
+    $("#update-income-form").find(".income-field").val(currentIncome == 0 ? '' : currentIncome);
 });
 
 document.getElementById("addField").addEventListener("click", function() {
@@ -93,7 +93,7 @@ document.getElementById("add-expense-form").addEventListener("submit", async fun
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         $('#addExpenseModal').modal('hide');
-        await showStatusMessage("Added Successfully!", 'true', [loadExpenses, loadBudgets]);
+        await showStatusMessage("Added Successfully!", 'true', [loadExpenses, loadBudgets, loadIncome]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -112,15 +112,9 @@ function onAddExpenseClick(event){
     document.getElementById('add-expense-form').classList.remove('hide');
     // document.getElementById('add-expense-form').style.display = 'block';
 }
-function showStatus(button){
-    button.classList.add("hide");
-    document.getElementById('hide-stats-btn').classList.remove("hide");
-    document.getElementById('stats').classList.remove("hide");
-}
 function getStats(){
     let stats = {};
     let totalSum = 0;
-    console.log("allExpenses: ",allExpenses)
 
     for(let key in allExpenses[currentMonth]){
         for(let i = 0; i < allExpenses[currentMonth][key].length; i++){
@@ -139,7 +133,6 @@ function getStats(){
 function loadStats(changedMonth){
     let stats = {};
     let totalSum = 0;
-    console.log("allExpenses: ",allExpenses)
 
     for(let key in allExpenses[changedMonth]){
         for(let i = 0; i < allExpenses[changedMonth][key].length; i++){
@@ -190,11 +183,7 @@ function loadStats(changedMonth){
     //     statsList.appendChild(li);
     // }
 }
-function hideStatus(button){
-    button.classList.add("hide");
-    document.getElementById('show-stats-btn').classList.remove("hide");
-    document.getElementById('stats').classList.add("hide");
-}
+
 document.querySelectorAll(".date-field").forEach(input => {
     input.value = new Date().toISOString().split('T')[0];
 });
@@ -304,7 +293,6 @@ async function loadExpenses(categoryId = null){
 }
 function isDateHaveWeekdayFormat(dateString){
     let parts = dateString.split(',');
-    // console.log(dateString," = parts.length: ",parts, ", TT: ",dateString.includes(","))
     return parts.length > 1 ? true : false;
 }
 function formatDate(dateString, standard = true) {
@@ -322,7 +310,6 @@ function formatDate(dateString, standard = true) {
         const year = String(date.getFullYear()).slice(-2);
         formattedDate = `${weekday}, ${day}-${month}-${year}`;
     }
-    console.log(dateString,", standard: ",standard, ", formattedDate: ",formattedDate)
 
     return formattedDate;
 }
@@ -350,11 +337,7 @@ function editExpense(td) {
     // form.classList.remove("hide");
     // window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function cancelUpdateExpense(){
-    document.querySelector(".expenses-table").classList.remove("hide");
-    document.getElementById("update-expense-form").classList.add("hide");
-    document.getElementById("update-expense-form").reset();
-}
+
 document.getElementById("update-expense-form").addEventListener("submit", async function(event) {
     event.preventDefault();
     const submitButton = document.getElementById("update-btn");
@@ -377,7 +360,7 @@ document.getElementById("update-expense-form").addEventListener("submit", async 
     formSubmitData = await formSubmitData.json();
     if(formSubmitData.status){
         $("#updateExpenseModal").modal("hide");
-        await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets]);
+        await showStatusMessage('Updated successfuly!', 'true', [loadExpenses, loadBudgets, loadIncome]);
     }else{
         await showStatusMessage(formSubmitData.error, 'false');
     }
@@ -440,7 +423,7 @@ async function deleteExpense(button) {
                 }
             });
             tr.remove();
-            await showStatusMessage('Deleted successfuly!', 'true', [loadExpenses, loadBudgets]);
+            await showStatusMessage('Deleted successfuly!', 'true', [loadExpenses, loadBudgets, loadIncome]);
         }else{
             await showStatusMessage(formSubmitData.error, 'false');
         }
@@ -451,7 +434,6 @@ async function deleteExpense(button) {
 
 async function onMonthChange(event){
     currentMonth = event.value;
-    cancelUpdateExpense();
     await loadExpenses();
     await loadBudgets();
     await loadIncome();
@@ -483,7 +465,6 @@ async function loadCategories(){
     });
 }
 async function editCategory(td){
-    console.log("FFF: ",$(this).attr("category-name"), ", R: ",$("#update-category-form").find("input[name='name']"))
     $("#updateCategoryModal").modal("show");
     $("#update-category-form").find("input[name='categoryId']").val($(this).attr("category-id"));
     $("#update-category-form").find("input[name='name']").val($(this).attr("category-name"));
@@ -491,7 +472,6 @@ async function editCategory(td){
 
 async function loadBudgets(){
     const stats = getStats();
-    console.log("stats:",stats)
     let data = await fetch('/budgets?month='+currentMonth);
     data = await data.json();
     const categorizedBudgets = {};
@@ -499,7 +479,6 @@ async function loadBudgets(){
     budgetsTbody.innerHTML = '';
     const budgets = data.data.budgets;
     budgets.forEach(e => categorizedBudgets[e.categoryId] = e);
-    console.log("categories: ",categories)
     categories.forEach(cat => {
         const spent = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].spent : 0;
         const limit = categorizedBudgets[cat._id] ? categorizedBudgets[cat._id].limit : 0;
@@ -534,7 +513,7 @@ async function setLimit(button) {
     const limit = button.getAttribute('limit');
     const form = document.getElementById("set-budget-form");
     form.querySelector(".category-id-field").value = categoryId;
-    form.querySelector(".limit-field").value = limit;
+    form.querySelector(".limit-field").value = limit == 0 ? '' : limit;
     form.querySelector(".limit-category-name").textContent = arrangedCategoriesById[categoryId].name;
 }
 async function updateLimit(button) {
@@ -545,8 +524,7 @@ async function updateLimit(button) {
     const form = document.getElementById("update-budget-form");
     form.querySelector(".budget-id-field").value = budgetId;
     form.querySelector(".spent-field").value = spent;
-    form.querySelector(".limit-field").value = limit;
-    console.log("FFF: ",form.querySelector(".limit-category-name"))
+    form.querySelector(".limit-field").value = limit == 0 ? '' : limit;
     form.querySelector(".limit-category-name").classList.add("123");
     form.querySelector(".limit-category-name").textContent = arrangedCategoriesById[categoryId].name;
 }
@@ -665,7 +643,6 @@ $('#update-category-form').on("submit", async function (e) {
         formDataJson[field.name] = field.value;
     });
     const categoryId = formDataJson['categoryId'];
-    console.log("formDataJson: ",formDataJson.name)
     let formSubmitData = await fetch("/categories/"+categoryId, {
         method: "PUT",
         headers: {
