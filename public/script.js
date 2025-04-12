@@ -25,6 +25,29 @@ $(".expense-info").on("click", ".income", function () {
     $("#updateIncomeModal").modal('show');
     $("#update-income-form").find(".income-field").val(currentIncome == 0 ? '' : currentIncome);
 });
+function searchTable() {
+    let input = document.getElementById("search");
+    let filter = input.value.toLowerCase();
+    let tableBody = document.getElementById("expenses");
+    let rows = tableBody.getElementsByTagName("tr");
+    
+    for (let row of rows) {
+        let cells = row.getElementsByTagName("td");
+        let match = false;
+        for (let cell of cells) {
+            if (cell.innerText.toLowerCase().includes(filter)) {
+                match = true;
+                break;
+            }
+        }
+        row.style.display = match ? "" : "none";
+        // const closestDateRow = row.closest('tr.date-row');
+        // if(closestDateRow){
+        //     console.log("closestDateRow: ",closestDateRow, ", match: ",match)
+        //     closestDateRow.style.display = match ? "" : "none";
+        // }
+    }
+}
 
 document.getElementById("addField").addEventListener("click", function() {
     const container = document.getElementById("fieldsContainer");
@@ -241,11 +264,14 @@ async function loadExpenses(categoryId = null){
         });
         allExpenses[currentMonth] = finalExpenses;
         if(Object.entries(finalExpenses).length > 0){
+            let p = 0;
             for(let key in finalExpenses){
                 let sum = 0;
                 finalExpenses[key].forEach(e => { sum += parseFloat(e.amount); })
                 let row = expensesTbody.insertRow();
                 row.classList.add('date-row');
+                row.classList.add('date-row-'+p);
+                p++;
                 row.classList.add('active');
                 let cell_l = row.insertCell(0);
                 let cell_2 = row.insertCell(1);
@@ -269,7 +295,7 @@ async function loadExpenses(categoryId = null){
                     cell_2.innerHTML = `<div class="amount">${ruppeeSymbol} ${parseFloat(finalExpenses[key][i].amount).toLocaleString()} </div>`;
                     cell_3.innerHTML = `
                         <input type="hidden" name="id" class="id-field" value="${finalExpenses[key][i]._id}">
-                        <button type="button" class="btn btn-default btn-sm" onclick="deleteExpense(this)">
+                        <button type="button" class="btn btn-danger btn-xs" onclick="deleteExpense(this)">
                             <span class="glyphicon glyphicon-trash"></span> 
                         </button>
                     `;

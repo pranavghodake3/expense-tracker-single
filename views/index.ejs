@@ -73,6 +73,12 @@
             </div>
         </div>
     </div>
+    <div class="row search-input">
+        <div class="col-xs-12">
+            <input type="text" name="search" id="search" placeholder="Search" onkeyup="searchTable()">
+            <button type="button" class="btn btn-primary btn-xs" onclick="document.getElementById('search').value = '';searchTable();">Clear</button>
+        </div>
+    </div>
     <table class="table table-bordered table-responsive expenses-table">
         <tbody id="expenses"></tbody>
     </table>

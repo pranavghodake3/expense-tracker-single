@@ -113,5 +113,8 @@ tr.expense-title-row {
     font-size: 15px;
     font-weight: bold;
 }
-
+.search-input{
+    margin-bottom: 5px;
+    text-align: left;
+}
   
