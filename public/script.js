@@ -25,6 +25,9 @@ $(".expense-info").on("click", ".income", function () {
     $("#updateIncomeModal").modal('show');
     $("#update-income-form").find(".income-field").val(currentIncome == 0 ? '' : currentIncome);
 });
+$('#setLimitModal, #updateLimitModal, #updateIncomeModal').on('shown.bs.modal', function () {
+    $("input[type='number']").trigger("focus");
+});
 function searchTable() {
     let input = document.getElementById("search");
     let filter = input.value.toLowerCase();
