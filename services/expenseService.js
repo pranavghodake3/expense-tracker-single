@@ -34,7 +34,6 @@ const getExpenseById = async(id) => {
 
 const createExpense = async(body) => {
     const data = [];
-    let totalSpent = 0;
     for (let i = 0; i < body.length; i++) {
         const { categoryId, amount, date, title, newCategory } = body[i];
         let finalCategoryId = categoryId;
@@ -62,11 +61,10 @@ const createExpense = async(body) => {
             });
         }
         data.push(response);
-        totalSpent += parseFloat(amount);
         const incomeFilter = {  month: expenseMonth, year: expenseYear };
         let incomeTransactionObj = await incomeTransactionModel.find(incomeFilter);
         if(incomeTransactionObj){
-            await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: totalSpent + parseFloat(incomeTransactionObj[0].spentTotal)});
+            await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: parseFloat(amount) + parseFloat(incomeTransactionObj[0].spentTotal)});
         }
     }
     
