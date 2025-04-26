@@ -2,9 +2,14 @@ const expenseModel = require("../models/expenseModel");
 const categoryModel = require("../models/categoryModel");
 const budgetModel = require("../models/budgetModel");
 const incomeTransactionModel = require("../models/incomeTransactionModel");
+const fs = require('fs');
+const csv = require('csv-parser');
+const path = require('path');
+const Category = require("../models/categoryModel");
 const currentYear = new Date().getFullYear().toString();
 const currentMonth =  new Date().getMonth();
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const rootPath = process.cwd();
 
 const getExpenses = async(month = null, categoryId = null) => {
     const monthIndex = months.indexOf(month);
@@ -63,7 +68,8 @@ const createExpense = async(body) => {
         data.push(response);
         const incomeFilter = {  month: expenseMonth, year: expenseYear };
         let incomeTransactionObj = await incomeTransactionModel.find(incomeFilter);
-        if(incomeTransactionObj){
+        if(incomeTransactionObj.length == 1){
+            console.log("incomeTransactionObj: ",incomeTransactionObj)
             await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: parseFloat(amount) + parseFloat(incomeTransactionObj[0].spentTotal)});
         }
     }
@@ -126,6 +132,7 @@ const deleteExpense = async(id) => {
     const incomeFilter = {  month: expenseMonth, year: expenseYear };
     let incomeTransactionObj = await incomeTransactionModel.find(incomeFilter);
     if(incomeTransactionObj){
+        console.log("incomeTransactionObj: ",incomeTransactionObj)
         await incomeTransactionModel.findByIdAndUpdate(incomeTransactionObj[0]._id, {spentTotal: parseFloat(incomeTransactionObj[0].spentTotal) - parseFloat(expense.amount)});
     }
 
@@ -138,6 +145,80 @@ const deleteExpensesByCondition = async(condition) => {
     return data;
 };
 
+const importCSV = async() => {
+    // const monthIndex = 1;
+    // const startDate = new Date(currentYear, monthIndex, 1);
+    // const endDate = new Date(currentYear, monthIndex+1, 1);
+
+    // const filter = {
+    //     date: { $gte: startDate, $lt: endDate }
+    // };
+    // await expenseModel.deleteMany(filter)
+    const filePath = path.join(rootPath, 'csv', 'jan.csv'); // change path if needed
+    let results = [];
+    const categories = [];
+    
+  results = await parseCSV(filePath);
+  const catObj = {};
+  const insertData = [];
+  for (let i = 0; i < results.length; i++) {
+    const element = results[i];
+    let categoryId = '';
+    if(typeof catObj[element.Category] == 'undefined'){
+        const cat = await Category.findOne({name: element.Category});
+        if(cat){
+            catObj[element.Category] = cat._id;
+            categoryId = cat._id;
+        }else if(element.Category == 'Mutton Mase'){
+            categoryId = '67cc09a2a2ea244dfb0c1cc3';
+        }
+    }else{
+        categoryId = catObj[element.Category];
+    }
+    const [day, month, year] = element.Date.split("-");
+    const formattedDate = `${year}-${month}-${day}`;
+    const insertObj = {
+        categoryId,
+        amount: parseFloat(element.Amount),
+        date: formattedDate,
+        title: element.Description,
+        newCategory: null
+    };
+    insertData.push(insertObj)
+  }
+    // await createExpense(insertData);
+
+    return {
+        insertData,
+    };
+};
+
+const parseCSV = (filePath) => {
+    return new Promise((resolve, reject) => {
+      const results = [];
+      const categories = [];
+  
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (data) => {
+            if(!categories.includes(data.Category)) categories.push(data.Category);
+            results.push(data)
+        })
+        .on('end', async() => {
+            // for (let i = 0; i < categories.length; i++) {
+            //     const cat = await Category.findOne({name: categories[i]});
+            //     if(cat){
+            //         console.log("cat: ",cat.name)
+            //     }else{
+            //         console.log("missing cat name: ",categories[i]);
+            //     }
+            // }
+            resolve(results)
+        })
+        .on('error', (err) => reject(err));
+    });
+};
+
 module.exports = {
     getExpenses,
     getExpenseById,
@@ -145,4 +226,5 @@ module.exports = {
     updateExpense,
     deleteExpense,
     deleteExpensesByCondition,
+    importCSV,
 };

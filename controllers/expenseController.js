@@ -52,10 +52,20 @@ const deleteExpenseById = async (req, res) => {
     }
 };
 
+const importCSV = async (req, res) => {
+    try {
+        const response = await expenseService.importCSV();
+        return successResponse(res, response);
+    } catch (error) {
+        return errorResponse(res, error);
+    }
+};
+
 module.exports = {
     getExpenses,
     getExpenseById,
     createExpense,
     updateExpense,
     deleteExpenseById,
+    importCSV,
 };
